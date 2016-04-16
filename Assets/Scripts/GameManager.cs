@@ -51,5 +51,7 @@ public class GameManager : MonoBehaviour, ITickable {
 
 		fpsText.text = "FPS: " + fpsCounter.FPS;
 		frameText.text = "Current Frame: " + frameController.currentFrame;
+		frameText.text += "\n\nWolf State : " + wolf.State;
+		frameText.text += "\nWolf State Ticks: " + wolf.TicksLeftInState;
 	}
 }

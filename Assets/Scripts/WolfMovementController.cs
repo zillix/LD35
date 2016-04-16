@@ -1,18 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public class WolfMovementController : MonoBehaviour, ITickable
 {
 	private Vector3 position;
-	private float startRadius;
-	private float targetRadius;
+	public float StartRadius { get; set; }
+	public float TargetRadius { get; set; }
+	public Vector3 TargetAngleAnchor
+	{
+		get; set;
+	}
+	private float currentRadius;
 	private Vector3 targetPosition;
 
 	public Transform WorldCenter;
-	private PlayerController player;
 
-	public float MaxAngleSpeed = 10f;
 	public float AngleSpeed = 0f;
+
+	public float RadiusSpeed = 20f;
+	
+	public bool AtGoal { get; set; }
 
 	void Awake()
 	{
@@ -22,19 +30,52 @@ public class WolfMovementController : MonoBehaviour, ITickable
 	void Start()
 	{
 		WorldCenter = GameObject.Find("WorldCenter").transform;
-		player = GameObject.FindObjectOfType<PlayerController>();
 
-		startRadius = (transform.position - WorldCenter.position).magnitude;
+		StartRadius = (transform.position - WorldCenter.position).magnitude;
 		position = transform.position;
+		TargetRadius = StartRadius;
+		currentRadius = TargetRadius;
+
 	}
 
 	public void TickFrame()
 	{
-		targetRadius = startRadius;
-		AngleSpeed = MaxAngleSpeed; 
-		targetPosition = (player.transform.position - WorldCenter.position).normalized * targetRadius;
+		
 
+		targetPosition = (TargetAngleAnchor - WorldCenter.position).normalized * TargetRadius;
+
+
+
+		// Actually perform the movement
 		position = MathUtil.RotateVector(position, targetPosition, AngleSpeed * Time.fixedDeltaTime);
+		
+		if (Mathf.Abs(currentRadius - TargetRadius) < RadiusSpeed * Time.fixedDeltaTime)
+		{
+			currentRadius = TargetRadius;
+		}
+		else
+		{
+			if (currentRadius > TargetRadius)
+			{
+				currentRadius -= RadiusSpeed * Time.fixedDeltaTime;
+			}
+			else
+			{
+				currentRadius += RadiusSpeed * Time.fixedDeltaTime;
+			}
+		}
+
+		position = position.normalized * currentRadius;
+
 		transform.position = position;
+
+		if( ((Vector2)(position - targetPosition)).magnitude < .5f)
+		{
+			AtGoal = true;
+		}
+		else
+		{
+			AtGoal = false;
+		}
 	}
 }
