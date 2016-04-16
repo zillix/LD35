@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour, ITickable {
 	public static GameManager instance;
 
 	public PlayerController player;
+	public WolfController wolf;
 	public Text fpsText;
 	public Text frameText;
 	public CameraController mainCamera;
@@ -28,6 +29,7 @@ public class GameManager : MonoBehaviour, ITickable {
 	public void TickFrame()
 	{
 		player.TickFrame();
+		wolf.TickFrame();
 
 		mainCamera.TickFrame();
 

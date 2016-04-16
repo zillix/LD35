@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 		transform.position = physics.Position;
 
 		Vector3 up = physics.Up;
-		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(ref up) - 90);
+		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(up) - 90);
 		transform.rotation = rotation;
 	}
 }

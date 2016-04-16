@@ -17,7 +17,7 @@ public class ColliderToMesh : MonoBehaviour
 		CreateMesh();
 	}
 
-	public void CreateMesh(bool invertNormals = true)
+	public void CreateMesh()
 	{
 		Collider2D collider = gameObject.GetComponent(typeof(Collider2D)) as Collider2D;
 		Vector2[] path;
@@ -27,7 +27,8 @@ public class ColliderToMesh : MonoBehaviour
 		}
 		else if (collider is PolygonCollider2D)
 		{
-			path = (collider as PolygonCollider2D).GetPath(0);
+			//path = (collider as PolygonCollider2D).GetPath(0);
+			path = (collider as PolygonCollider2D).points;
 		}
 		else
 		{
@@ -54,7 +55,7 @@ public class ColliderToMesh : MonoBehaviour
 		mesh.uv = uvs;
 		mesh.RecalculateNormals();
 
-		if (invertNormals)
+		/*if (invertNormals)
 		{
 			Vector3[] normals = mesh.normals;
 			for (int i = 0; i < normals.Length; ++i)
@@ -65,7 +66,7 @@ public class ColliderToMesh : MonoBehaviour
 			}
 
 			mesh.SetNormals(new List<Vector3>(normals));
-		}
+		}*/
 
 
 		mesh.RecalculateBounds();
