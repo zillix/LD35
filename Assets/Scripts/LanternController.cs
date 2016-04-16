@@ -44,4 +44,9 @@ public class LanternController : MonoBehaviour, ITickable {
 		IsLit = true;
 		flareFramesRemaining = MaxFlareFrames;
 	}
+
+	public void Extinguish()
+	{
+		Destroy(gameObject);
+	}
 }

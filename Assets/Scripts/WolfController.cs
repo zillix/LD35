@@ -7,13 +7,16 @@ public class WolfController : MonoBehaviour, ITickable {
 	private Animator animator;
 	private WolfMovementController movement;
 
+	public int TotalHits = 3;
+	private int hitsRemaining;
+
 
 	public float AttackDist = 20f;
 	public float RecoilHitDist = 50f;
 	public float HowlDist = 47f;
 	public float SignalAttackDist = 52f;
 
-	public WolfState State { get; private set; }
+	public WolfState State { get { return stateData.state; } }
 	private WolfStateData stateData;
 
 	public int TicksLeftInState { get; private set; }
@@ -24,8 +27,10 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	void Awake()
 	{
-		animator = GetComponent<Animator>();
+		animator = GetComponentInChildren<Animator>();
+		animator.applyRootMotion = false;
 		movement = GetComponent<WolfMovementController>();
+		hitsRemaining = TotalHits;
 	}
 
 	void Start()
@@ -50,6 +55,11 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	private void setState(WolfState newState)
 	{
+		if (stateData != null)
+		{
+			Debug.Log("Entering state " + newState + " from " + stateData.state);
+		}
+
 		WolfStateData data = getData(newState);
 		if (data != null)
 		{
@@ -76,7 +86,8 @@ public class WolfController : MonoBehaviour, ITickable {
 			movement.AngleSpeed = data.angleSpeed;
 			movement.RadiusSpeed = data.radiusSpeed;
 
-			if (data.durationType == StateDurationType.Frames)
+			if (data.durationType == StateDurationType.Frames
+				|| data.durationType == StateDurationType.FramesOrTarget)
 			{
 				TicksLeftInState = (int)Random.Range(data.minDuration, data.maxDuration);
 			}
@@ -86,9 +97,14 @@ public class WolfController : MonoBehaviour, ITickable {
 			}
 
 			movement.AtGoal = false;
+
+
+
+
+
+			animator.SetInteger("State", getAnimState(data.state));
 		}
 
-		State = newState;
 		stateData = data;
 	}
 
@@ -96,21 +112,29 @@ public class WolfController : MonoBehaviour, ITickable {
 	{
 		if (stateData.anchorType == AnchorType.PlayerPosition)
 		{
-			movement.TargetAngleAnchor = player.transform.position;
+			if (player.IsOutside)
+			{
+				movement.TargetAngleAnchor = player.transform.position;
+			}
+			else
+			{
+				setState(WolfState.Idle);
+			}
 		}
 
-		if (TicksLeftInState > 0)
+		if ((stateData.durationType == StateDurationType.UntilTargetReached
+		   || stateData.durationType == StateDurationType.FramesOrTarget)
+		   && movement.AtGoal)
+		{
+			advanceState();
+		}
+		else if (TicksLeftInState > 0)
 		{
 			TicksLeftInState--;
 			if (TicksLeftInState == 0)
 			{
 				advanceState();
 			}
-		}
-		else if (stateData.durationType == StateDurationType.UntilTargetReached
-			&& movement.AtGoal)
-		{
-			advanceState();
 		}
 	}
 
@@ -170,6 +194,39 @@ public class WolfController : MonoBehaviour, ITickable {
 
 		return null;
 	}
+
+	private int getAnimState(WolfState state)
+	{
+		switch (state)
+		{
+			case WolfState.Idle:
+				return 0;
+			case WolfState.Pursue:
+				return 1;
+			case WolfState.SignalAttack:
+				return 2;
+			case WolfState.AttackApproach:
+				return 3;
+			case WolfState.Bite:
+				return 4;
+			case WolfState.RecoilMiss:
+				return 5;
+			case WolfState.RecoilHit:
+				return 6;
+			case WolfState.Howl:
+				return 7;
+			case WolfState.Flee:
+				return 8;
+
+		}
+
+		return 0;
+    }
+
+	public void ReceiveDamage()
+	{
+		setState(WolfState.RecoilHit);
+	}
 }
 
 [System.Serializable]
@@ -206,7 +263,8 @@ public enum StateDurationType
 {
 	None,
 	Frames,
-	UntilTargetReached
+	UntilTargetReached,
+	FramesOrTarget
 }
 
 public enum WolfState
