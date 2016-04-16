@@ -1,3 +1,23 @@
+# Unity
+Temp/
+obj/
+Library/
+bin/
+
+AssetVersioning.db
+Assets/hidden*
+
+
+*.DS_Store
+*.sln
+*.userprefs
+*.csproj
+
+Assembly-CSharp
+
+
+
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
