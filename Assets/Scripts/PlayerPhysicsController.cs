@@ -25,6 +25,8 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 	public Vector3 Up { get; private set; }
 	public Vector3 Right {  get { return new Vector3(Up.y, -Up.x, -Up.z); } }
 
+	public void SetUp(Vector3 up) { Up = up; }
+
 	private Collider2D surface = null;
 	private int currentDodgeFrames = 0;
 
@@ -70,7 +72,8 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 
 		// Lose velocity to friction
 		if (!IsDodging
-			&& (lastDirectionHeld == 0))
+			&& (lastDirectionHeld == 0)
+			&& IsGrounded)
 		{
 			if (rightDot > 0)
 			{
@@ -166,6 +169,11 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		{
 			Debug.LogWarning("Caught an infinite loop");
 		}
+	}
+
+	public void SetVelocity(Vector3 velocity)
+	{
+		Velocity = velocity;
 	}
 
 	public void Move(int direction)

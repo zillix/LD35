@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour, ITickable {
@@ -18,6 +19,11 @@ public class GameManager : MonoBehaviour, ITickable {
 
 	private FPSCounter fpsCounter;
 
+	public List<LanternController> Lanterns = new List<LanternController>();
+
+	public bool RotateGravity = true;
+	public Vector3 Up {  get { return player.Physics.Up; } }
+
 	public void Awake()
 	{
 		GameManager.instance = this;
@@ -26,10 +32,20 @@ public class GameManager : MonoBehaviour, ITickable {
 		fpsCounter = GetComponent<FPSCounter>();
 	}
 
+	public void Start()
+	{
+		Lanterns = new List<LanternController>(FindObjectsOfType<LanternController>());
+	}
+
 	public void TickFrame()
 	{
 		player.TickFrame();
 		wolf.TickFrame();
+
+		foreach (LanternController lantern in Lanterns)
+		{
+			lantern.TickFrame();
+		}
 
 		mainCamera.TickFrame();
 

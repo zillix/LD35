@@ -22,10 +22,14 @@ public class PlayerController : MonoBehaviour, ITickable {
 	public PlayerPhysicsController Physics { get; private set; }
 	private Animator animator;
 
+	public TorchController Torch;
+
 	private Direction facing = Direction.Right;
 	public Side Side { get; private set; }
 	public bool IsInside {  get { return Side == Side.Inside; } }
 	public bool IsOutside {  get { return Side == Side.Outside; } }
+
+	public bool IsTorchHeld {  get { return Torch.IsHeld;  } }
 
 	void Awake()
 	{
@@ -72,6 +76,13 @@ public class PlayerController : MonoBehaviour, ITickable {
 				{
 					Physics.Move(0);
 				}
+
+				if (IsInside
+					&& IsTorchHeld
+					&& input.GetButtonDown(Button.Up))
+				{
+					throwTorch();
+				}
 			}
 
 			if (facing == Direction.Left)
@@ -88,10 +99,17 @@ public class PlayerController : MonoBehaviour, ITickable {
 		animator.SetBool("Dodging", Physics.IsDodging);
 		animator.SetFloat("Speed", Mathf.Abs(Physics.Velocity.magnitude));
 
+		Torch.TickFrame();
+
 		transform.position = Physics.Position;
 
 		Vector3 up = Physics.Up;
 		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(up) - 90);
 		transform.rotation = rotation;
+	}
+
+	private void throwTorch()
+	{
+		Torch.Throw(Physics.Velocity);
 	}
 }
