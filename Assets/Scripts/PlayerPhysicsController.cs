@@ -39,8 +39,7 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		Velocity = Vector3.zero;
 		Up = new Vector3(0, 1, 0);
 		Position = transform.position;
-		int groundLayer = LayerMask.NameToLayer("Ground");
-		groundLayerMask = 1 << groundLayer;
+		groundLayerMask = LayerUtil.GetLayerMask(LayerUtil.MOON);
 	}
 
 	public void TickFrame()

@@ -19,16 +19,18 @@ public enum Side
 public class PlayerController : MonoBehaviour, ITickable {
 
 	private InputController input = new InputController();
-	private PlayerPhysicsController physics;
+	public PlayerPhysicsController Physics { get; private set; }
 	private Animator animator;
 
 	private Direction facing = Direction.Right;
 	public Side Side { get; private set; }
+	public bool IsInside {  get { return Side == Side.Inside; } }
+	public bool IsOutside {  get { return Side == Side.Outside; } }
 
 	void Awake()
 	{
 		Side = Side.Inside;
-		physics = GetComponent<PlayerPhysicsController>();
+		Physics = GetComponent<PlayerPhysicsController>();
 		animator = GetComponent<Animator>();
 	}
 
@@ -42,33 +44,33 @@ public class PlayerController : MonoBehaviour, ITickable {
 	public void TickFrame () {
 		if (input.GetButtonDown(Button.Dodge))
 		{
-			physics.Dodge(facing == Direction.Left ? -1 : 1);
+			Physics.Dodge(facing == Direction.Left ? -1 : 1);
 		}
 
-		if (!physics.IsDodging)
+		if (!Physics.IsDodging)
 		{
-			if (physics.IsGrounded
+			if (Physics.IsGrounded
 				&& input.GetButtonDown(Button.Flip))
 			{
-				physics.Flip();
+				Physics.Flip();
 				facing = facing == Direction.Left ? Direction.Right : Direction.Left;
-				Side = Side == Side.Inside ? Side.Outside : Side.Inside;
+				Side = IsInside ? Side.Outside : Side.Inside;
 			}
 			else
 			{
 				if (input.GetButton(Button.Left))
 				{
-					physics.Move(-1);
-					facing = Direction.Left;
+					Physics.Move(IsInside ? 1 : -1);
+					facing = IsInside ? Direction.Right : Direction.Left;
 				}
 				else if (input.GetButton(Button.Right))
 				{
-					physics.Move(1);
-					facing = Direction.Right;
+					Physics.Move(IsInside ? -1 : 1);
+					facing = IsInside ? Direction.Left : Direction.Right;
 				}
 				else
 				{
-					physics.Move(0);
+					Physics.Move(0);
 				}
 			}
 
@@ -82,13 +84,13 @@ public class PlayerController : MonoBehaviour, ITickable {
 			}
 		}
 
-		physics.TickFrame();
-		animator.SetBool("Dodging", physics.IsDodging);
-		animator.SetFloat("Speed", Mathf.Abs(physics.Velocity.magnitude));
+		Physics.TickFrame();
+		animator.SetBool("Dodging", Physics.IsDodging);
+		animator.SetFloat("Speed", Mathf.Abs(Physics.Velocity.magnitude));
 
-		transform.position = physics.Position;
+		transform.position = Physics.Position;
 
-		Vector3 up = physics.Up;
+		Vector3 up = Physics.Up;
 		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(up) - 90);
 		transform.rotation = rotation;
 	}

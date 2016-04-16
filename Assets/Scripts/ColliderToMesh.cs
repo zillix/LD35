@@ -55,19 +55,6 @@ public class ColliderToMesh : MonoBehaviour
 		mesh.uv = uvs;
 		mesh.RecalculateNormals();
 
-		/*if (invertNormals)
-		{
-			Vector3[] normals = mesh.normals;
-			for (int i = 0; i < normals.Length; ++i)
-			{
-				Vector3 normal = normals[i];
-				normal *= -1;
-				normals[i] = normal;
-			}
-
-			mesh.SetNormals(new List<Vector3>(normals));
-		}*/
-
 
 		mesh.RecalculateBounds();
 
