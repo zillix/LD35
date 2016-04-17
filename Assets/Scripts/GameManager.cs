@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour, ITickable {
 
 	public List<LanternController> Lanterns = new List<LanternController>();
 
+	public GameObject WolfPrefab;
+
 	public bool RotateGravity = true;
 	public Vector3 Up {  get { return player.Physics.Up; } }
 
@@ -30,6 +32,8 @@ public class GameManager : MonoBehaviour, ITickable {
 		frameController = gameObject.AddComponent<FrameController>();
 		frameController.game = this;
 		fpsCounter = GetComponent<FPSCounter>();
+		wolf = Instantiate(WolfPrefab).GetComponent<WolfController>();
+		wolf.transform.position = GameObject.Find("WolfSpawn").transform.position;
 	}
 
 	public void Start()
