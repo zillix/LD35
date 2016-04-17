@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour, ITickable {
 	public Text fpsText;
 	public Text frameText;
 	public CameraController mainCamera;
+	public TextManager TextManager;
 
 	public FrameController frameController;
 	public int currentFrame {  get { return frameController.currentFrame; } }
@@ -23,8 +24,15 @@ public class GameManager : MonoBehaviour, ITickable {
 
 	public GameObject WolfPrefab;
 
+	public IntroManager introManager;
+
+
 	public bool RotateGravity = true;
 	public Vector3 Up {  get { return player.Physics.Up; } }
+
+	public bool BattleStarted { get { return introManager.BattleStarted; } }
+
+	
 
 	public void Awake()
 	{
@@ -34,18 +42,38 @@ public class GameManager : MonoBehaviour, ITickable {
 		fpsCounter = GetComponent<FPSCounter>();
 		wolf = Instantiate(WolfPrefab).GetComponent<WolfController>();
 		wolf.transform.position = GameObject.Find("WolfSpawn").transform.position;
-	}
+
+		introManager = GetComponentInChildren<IntroManager>();
+    }
 
 	public void Start()
 	{
 		Lanterns = new List<LanternController>(FindObjectsOfType<LanternController>());
 		Application.targetFrameRate = 60;
+		TextManager = FindObjectOfType<TextManager>();
+
+		introManager.Init();
 	}
 
 	public void TickFrame()
 	{
+		if (!introManager.IntroStarted)
+		{
+			if (Input.anyKey)
+			{
+				introManager.StartIntro();
+			}
+			return;
+		}
+
+
 		player.TickFrame();
-		wolf.TickFrame();
+
+
+		if (BattleStarted)
+		{
+			wolf.TickFrame();
+		}
 
 		foreach (LanternController lantern in Lanterns)
 		{

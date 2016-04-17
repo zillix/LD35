@@ -29,10 +29,25 @@ public class TorchController : MonoBehaviour, ITickable {
 		Physics = GetComponent<PlayerPhysicsController>();
 		IsHeld = true;
 		emitter = GetComponent<GameEmitter>();
+
+		Vector3 startVec = player.transform.position + Physics.Up * HeldDistOFfGround;
+		startVec.z = 0;
+		transform.position = startVec;
+		
 	}
 
 	public void TickFrame()
 	{
+		/*if (!GameManager.instance.introManager.PlayerControls)
+		{
+			LightAura.GetComponentInChildren<Renderer>().enabled = false;
+			return;
+		}
+		else if (!GameManager.instance.introManager.BattleStarted)
+		{
+			LightAura.GetComponentInChildren<Renderer>().enabled = true;
+		}*/
+
 		emitter.EmitActive = !IsLit;
 
 		if (IsHeld)
@@ -46,6 +61,11 @@ public class TorchController : MonoBehaviour, ITickable {
 		}
 		else
 		{
+			if (!GameManager.instance.introManager.RotateWorld)
+			{
+				Physics.SetUp(Vector2.up);
+
+			}
 			Physics.TickFrame();
 			transform.position = Physics.Position;
 
@@ -88,9 +108,20 @@ public class TorchController : MonoBehaviour, ITickable {
 
 	public void Throw(Vector3 throwVel, bool voluntary)
 	{
-		throwVel *= ThrowVelMult;
-		throwVel.x += Physics.Up.x * ThrowSpeed;
-		throwVel.y += Physics.Up.y * ThrowSpeed;
+		if (GameManager.instance.introManager.RotateWorld)
+		{
+
+			throwVel *= ThrowVelMult;
+			throwVel.x += Physics.Up.x * ThrowSpeed;
+			throwVel.y += Physics.Up.y * ThrowSpeed;
+		}
+		else
+		{
+			throwVel.x = 0;
+			throwVel.y = ThrowSpeed;
+		}
+
+
 
 		Physics.SetVelocity(throwVel);
 

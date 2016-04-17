@@ -27,9 +27,10 @@ public class CameraController : MonoBehaviour, ITickable {
 		mainCamera = GetComponent<Camera>();
 		mainCamera.orthographicSize = InsideOrtho;
 	}
-	
+
 	// Update is called once per frame
-	public void TickFrame () {
+	public void TickFrame()
+	{
 		int cullingMask = -1;
 
 		if (player.IsInside)
@@ -106,14 +107,23 @@ public class CameraController : MonoBehaviour, ITickable {
 
 		transform.position = newPos;
 
-		float targetAngle = MathUtil.VectorToAngle(player.transform.position) + 270;
-		if (player.IsInside)
-		{
-			//targetAngle += 180;
-		}
-		cameraAngle = MathUtil.RotateAngle(cameraAngle, targetAngle, lerpSpeed * Time.fixedDeltaTime);
 
-		transform.rotation = Quaternion.Euler(0, 0, cameraAngle);
+		if (GameManager.instance.introManager.RotateWorld)
+		{
+			float offset = 270f;
+			if (!GameManager.instance.introManager.InvertInteriorCamera)
+			{
+				offset = 90f;
+			}
+			float targetAngle = MathUtil.VectorToAngle(player.transform.position) + offset;
+			if (player.IsInside)
+			{
+				//targetAngle += 180;
+			}
+			cameraAngle = MathUtil.RotateAngle(cameraAngle, targetAngle, lerpSpeed * Time.fixedDeltaTime);
+
+			transform.rotation = Quaternion.Euler(0, 0, cameraAngle);
+		}
 	}
 
 	private Vector3 calculateTargetPosition()

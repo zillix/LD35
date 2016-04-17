@@ -341,5 +341,7 @@ public enum WolfState
 	RecoilHit,
 	Howl,
 	Flee,
-	None
+	None,
+	Hiding,
+	Appear
 }

@@ -41,12 +41,22 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 
 	public bool UncapSpeeds { get; set; }
 
+	private GameObject leftBound;
+	private GameObject rightBound;
+
 	void Awake()
 	{
 		Velocity = Vector3.zero;
 		Up = new Vector3(0, 1, 0);
 		Position = transform.position;
 		groundLayerMask = LayerUtil.GetLayerMask(LayerUtil.MOON);
+		Position.z = 0;
+	}
+
+	void Start()
+	{
+		leftBound = GameObject.Find("LeftBound");
+		rightBound = GameObject.Find("RightBound");
 	}
 
 	public void TickFrame()
@@ -74,6 +84,14 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		if (!UncapSpeeds)
 		{
 			float maxSpeedX = IsDodging ? DodgeSpeed : MaxSpeed.x;
+
+
+
+			if (!GameManager.instance.introManager.BattleStarted && !IsDodging)
+			{
+				maxSpeedX = 3;
+	        }
+
 			if (rightDot > maxSpeedX)
 			{
 				float upDot = Vector3.Dot(Velocity, Up);
@@ -118,7 +136,11 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 					Debug.LogWarning("Collision with dist 0");
 				}
 				surface = hit.collider;
-				Up = hit.normal;
+
+				//if (GameManager.instance.introManager.RotateWorld)
+				{
+					Up = hit.normal;
+				}
 
 				IsGrounded = true;
 				UncapSpeeds = false;
@@ -149,6 +171,17 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		}
 
 		currentDodgeFrames--;
+
+		if (!GameManager.instance.introManager.RotateWorld)
+		{
+			if (Position.x <= leftBound.transform.position.x
+				|| Position.x >= rightBound.transform.position.x)
+			{
+				Velocity = new Vector3(0, -10, 0);
+				GameManager.instance.introManager.hitEdge();
+			}
+			Position.x = Mathf.Max(leftBound.transform.position.x, Mathf.Min(rightBound.transform.position.x, Position.x));
+		}
 
 		Up = new Vector3(Up.x, Up.y, 0);
 		Position.z = 0;
@@ -181,7 +214,10 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 				surface = hit.collider;
 
 				// Update 'up'
-				Up = hit.normal;
+				//if (GameManager.instance.introManager.RotateWorld)
+				{
+					Up = hit.normal;
+				}
 
 				// Cancel out velocity parallel to the normal
 				float dot = Vector3.Dot(Velocity, hit.normal);

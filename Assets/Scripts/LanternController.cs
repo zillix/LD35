@@ -20,8 +20,19 @@ public class LanternController : MonoBehaviour, ITickable {
 		IsLit = false;
 	}
 
+	void Start()
+	{
+
+		LightAura.transform.localScale = Vector3.zero;
+	}
+
 	public void TickFrame () {
 		Vector3 up = GameManager.instance.Up;
+		if (!GameManager.instance.introManager.RotateWorld)
+		{
+			up = Vector2.up;
+		}
+
 		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(up) - 90);
 		transform.rotation = rotation;
 
@@ -41,6 +52,10 @@ public class LanternController : MonoBehaviour, ITickable {
 
 	public void Flare()
 	{
+		if (!IsLit)
+		{
+			GameManager.instance.introManager.OnTorchLit();
+		}
 		IsLit = true;
 		flareFramesRemaining = MaxFlareFrames;
 	}

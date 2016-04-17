@@ -57,6 +57,11 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 	void Update()
 	{
+		if (!GameManager.instance.introManager.PlayerControls)
+		{
+			return;
+		}
+
 		if (input.GetButtonDown(Button.Dodge) && Physics.IsGrounded)
 		{
 			Debug.Log("Dodge pressed");
@@ -76,7 +81,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 			&& Torch.IsLit
 			&& !Physics.IsDodging
 			&& Physics.IsGrounded
-				&& input.GetButtonDown(Button.Flip))
+				&& input.GetButtonDown(Button.Flip)
+				&& GameManager.instance.introManager.AllTorchesLit)
 		{
 			Physics.Flip();
 			facing = facing == Direction.Left ? Direction.Right : Direction.Left;
@@ -87,20 +93,29 @@ public class PlayerController : MonoBehaviour, ITickable {
 	// Update is called once per frame
 	public void TickFrame () {
 		
+		if (!GameManager.instance.introManager.PlayerControls)
+		{
+			transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+			Torch.TickFrame();
+			return;
+		}
+
 
 		if (!Physics.IsDodging)
 		{
 			if (!IsInvincible || Physics.IsGrounded)
 			{
+				bool invertControls = IsInside && GameManager.instance.introManager.BattleStarted;
+
 				if (input.GetButton(Button.Left))
 				{
-					Physics.Move(IsInside ? 1 : -1);
-					facing = IsInside ? Direction.Right : Direction.Left;
+					Physics.Move(invertControls ? 1 : -1);
+					facing = invertControls ? Direction.Right : Direction.Left;
 				}
 				else if (input.GetButton(Button.Right))
 				{
-					Physics.Move(IsInside ? -1 : 1);
-					facing = IsInside ? Direction.Left : Direction.Right;
+					Physics.Move(invertControls ? -1 : 1);
+					facing = invertControls ? Direction.Left : Direction.Right;
 				}
 				else
 				{
@@ -127,23 +142,26 @@ public class PlayerController : MonoBehaviour, ITickable {
 		Physics.TickFrame();
 
 
-		if (!Physics.IsGrounded && IsOutside)
-		{
-			// This is garbage
-			// basically says don't go flying off
-			Physics.SetUp(transform.position.normalized);
-		}
-
 
 		animator.SetBool("Dodging", Physics.IsDodging);
 		animator.SetFloat("Speed", Mathf.Abs(Physics.Velocity.magnitude));
 
 		transform.position = Physics.Position;
 
-		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(RotationUp) - 90);
-		transform.rotation = rotation;
+		if (GameManager.instance.introManager.RotateWorld)
+		{
+			if (!Physics.IsGrounded && IsOutside)
+			{
+				// This is garbage
+				// basically says don't go flying off
+				Physics.SetUp(transform.position.normalized);
+			}
 
 
+			Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(RotationUp) - 90);
+			transform.rotation = rotation;
+
+		}
 
 		Torch.TickFrame();
 	}
