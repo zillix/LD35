@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using UnityEngine.SceneManagement;
 
 public class IntroManager : MonoBehaviour {
 
@@ -29,6 +30,11 @@ public class IntroManager : MonoBehaviour {
 	private bool reportedThrowUp = false;
 
 	private int torchCountReported = 0;
+
+	private bool gameEnded = false;
+	public bool wolfFled = false;
+
+	public GameObject blackScreen;
 
 	public void Awake()
 	{
@@ -69,7 +75,8 @@ public class IntroManager : MonoBehaviour {
 
 	void Update()
 	{
-		if (OutForLamp && torchesLit > torchCountReported && !AllTorchesLit)
+		if ((OutForLamp && torchesLit > torchCountReported && !AllTorchesLit)
+				|| (!gameEnded && wolfFled))
 		{
 			if ((player.transform.position - cottage.transform.position).magnitude < CottageDist)
 			{
@@ -117,6 +124,20 @@ public class IntroManager : MonoBehaviour {
 
 	public void OnReturnHome()
 	{
+		if (wolfFled)
+		{
+			gameEnded = true;
+			text.enqueue("what kept you, dear?");
+			text.enqueue("would you like to know how the story ends?");
+			text.enqueue("a third time fox slipped a hot pepper onto wolf's tongue");
+			text.enqueue("and a third time wolf howled in pain");
+			text.enqueue("but this time, wolf had had enough");
+			text.enqueue("look to the moon! wolf has fled!");
+			text.enqueue("what a clever fox!", -1, delegate () { endGame(); });
+			
+			return;
+		}
+
 		if (torchesLit == 1)
 		{
 			text.enqueue("so fox went to wolf, and he said-");
@@ -162,6 +183,51 @@ public class IntroManager : MonoBehaviour {
 	{
 		WolfHiding = false;
 		BattleStarted = true;
+	}
+
+	public void OnWolfFlee()
+	{
+		wolfFled = true;
+	}
+
+	private void endGame()
+	{
+
+		StartCoroutine(fadeOut(2));
+		queueRestartGame();
+	}
+
+	public IEnumerator fadeOut(float fadeDur)
+	{
+		SpriteRenderer sprite = blackScreen.GetComponent<SpriteRenderer>();
+		blackScreen.SetActive(true);
+
+		for (float timer = fadeDur; timer >= 0; timer -= Time.deltaTime)
+		{
+			Color color = sprite.color;
+			color.a = 1f - timer / fadeDur;
+			sprite.color = color;
+			yield return null;
+		}
+
+		Color color2 = sprite.color;
+		color2.a = 1f;
+		sprite.color = color2;
+
+
+	}
+
+	private void queueRestartGame()
+	{
+		StartCoroutine(restartGame());
+	}
+
+
+	private IEnumerator restartGame()
+	{
+		yield return new WaitForSeconds(3f);
+
+		SceneManager.LoadScene(0);
 	}
 
 
