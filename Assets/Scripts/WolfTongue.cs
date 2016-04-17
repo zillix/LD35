@@ -23,10 +23,27 @@ public class WolfTongue : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		TorchController torch = other.gameObject.GetComponent<TorchController>();
-        if (torch != null && !torch.IsHeld)
+		if (wolf.State == WolfState.Bite)
 		{
-			wolf.ReceiveDamage();
+			TorchController torch = other.gameObject.GetComponent<TorchController>();
+			if (torch != null && !torch.IsHeld && torch.IsLit)
+			{
+				wolf.ReceiveDamage();
+				torch.Extinguish();
+			}
+		}
+	}
+
+	void OnTriggerStay2D(Collider2D other)
+	{
+		if (wolf.State == WolfState.Bite)
+		{
+			TorchController torch = other.gameObject.GetComponent<TorchController>();
+			if (torch != null && !torch.IsHeld && torch.IsLit)
+			{
+				wolf.ReceiveDamage();
+				torch.Extinguish();
+			}
 		}
 	}
 }

@@ -54,5 +54,12 @@ public class GameManager : MonoBehaviour, ITickable {
 		frameText.text = "Current Frame: " + frameController.currentFrame;
 		frameText.text += "\n\nWolf State : " + wolf.State;
 		frameText.text += "\nWolf State Ticks: " + wolf.TicksLeftInState;
+		frameText.text += "\nWolf hits: " + wolf.HitsRemaining;
+		//frameText.text += "\nWolf Anim State: " + wolf.animator.GetCurrentAnimatorStateInfo(0).IsName;
+	}
+
+	public void OnWolfFleed()
+	{
+		// do something
 	}
 }

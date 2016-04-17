@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 			&& IsTorchHeld
 			&& input.GetButtonDown(Button.Up))
 		{
-			throwTorch();
+			throwTorch(true);
 		}
 
 		if (!Physics.IsDodging
@@ -157,9 +157,26 @@ public class PlayerController : MonoBehaviour, ITickable {
 		}
 	}
 
-	private void throwTorch()
+	private void throwTorch(bool voluntary)
 	{
-		Torch.Throw(Physics.Velocity);
+		Torch.Throw(Physics.Velocity, voluntary);
+	}
+
+	public void OnCollisionEnter2D(Collider2D collider)
+	{
+		if (collider.gameObject.layer == LayerMask.NameToLayer("Tongue"))
+		{
+			ReceiveHit();
+		}
+
+	}
+
+	public void OnCollisionStay2D(Collider2D collider)
+	{
+		if (collider.gameObject.layer == LayerMask.NameToLayer("Tongue"))
+		{
+			ReceiveHit();
+		}
 	}
 
 	public void OnTriggerEnter2D(Collider2D collider)
@@ -216,7 +233,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 		Physics.SetVelocity(knockBack);
 		Physics.IsGrounded = false;
-		Physics.UncapSpeeds = true;
+
+		GameManager.instance.wolf.GetBopped();
 	}
 
 	private void ReceiveHit()
@@ -228,7 +246,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 		if (IsTorchHeld && IsInside)
 		{
-			throwTorch();
+			throwTorch(false);
+			Torch.Extinguish();
 		}
 
 		// Knock back

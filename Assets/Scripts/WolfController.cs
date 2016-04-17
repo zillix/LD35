@@ -4,11 +4,14 @@ using System.Collections;
 [RequireComponent(typeof(WolfMovementController))]
 public class WolfController : MonoBehaviour, ITickable {
 
-	private Animator animator;
+	public Animator animator;
 	private WolfMovementController movement;
 
 	public int TotalHits = 3;
-	private int hitsRemaining;
+	public int HitsRemaining
+	{
+		get; private set;
+	}
 
 
 	public float AttackDist = 20f;
@@ -25,7 +28,7 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	public WolfStateData[] DataList = new WolfStateData[0];
 
-	private bool enraged = true;
+	private bool enraged = false;
 
 	public GameObject EyeBlurPrefab;
 	public GameObject eye;
@@ -44,7 +47,7 @@ public class WolfController : MonoBehaviour, ITickable {
 		animator = GetComponentInChildren<Animator>();
 		animator.applyRootMotion = false;
 		movement = GetComponent<WolfMovementController>();
-		hitsRemaining = TotalHits;
+		HitsRemaining = TotalHits;
 
 		InvokeRepeating("EyeBlur", EyeBlurFrequency, EyeBlurFrequency);
 	}
@@ -89,6 +92,8 @@ public class WolfController : MonoBehaviour, ITickable {
 		{
 			noseRenderer.material = initialNoseMaterial;
 		}
+
+		animator.SetBool("Enraged", enraged);
 
 	}
 
@@ -179,6 +184,12 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	private void advanceState()
 	{
+		if (stateData.state == WolfState.Flee)
+		{
+			GameManager.instance.OnWolfFleed();
+			return;
+		}
+
 		float weightSum = 0;
 
 		if (stateData.nextStates.Length == 1)
@@ -264,13 +275,21 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	public void ReceiveDamage()
 	{
+
+
 		setState(WolfState.RecoilHit);
-		enraged = false;
+		enraged = true;
+		HitsRemaining--;
+
+		if (HitsRemaining == 0)
+		{
+			setState(WolfState.Flee);
+		}
 	}
 
 	public void GetBopped()
 	{
-		enraged = true;
+		enraged = false;
 	}
 }
 

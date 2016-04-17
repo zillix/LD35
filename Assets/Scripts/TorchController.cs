@@ -10,9 +10,14 @@ public class TorchController : MonoBehaviour, ITickable {
 	public float ThrowVelMult = 1.5f;
 	public float LanternLightDist = 2f;
 
+	public bool WasThrown = false;
+	public bool IsLit = true;
+
 	private PlayerController player;
 
 	private PlayerPhysicsController physics;
+
+	public GameObject LightAura;
 
 	public float ThrowSpeed = 20f;
 
@@ -44,6 +49,7 @@ public class TorchController : MonoBehaviour, ITickable {
 				if ((lantern.transform.position - transform.position).magnitude < LanternLightDist)
 				{
 					lantern.Flare();
+					BecomeLit();
 				}
 			}
 
@@ -55,9 +61,27 @@ public class TorchController : MonoBehaviour, ITickable {
 		{
 			IsHeld = true;
 		}
+
+		if (physics.IsGrounded)
+		{
+			WasThrown = false;
+		}
 	}
 
-	public void Throw(Vector3 throwVel)
+	public void BecomeLit()
+	{
+		IsLit = true;
+		LightAura.GetComponentInChildren<Renderer>().enabled = true;
+	}
+
+	public void Extinguish()
+	{
+		IsLit = false;
+
+		LightAura.GetComponentInChildren<Renderer>().enabled = false;
+	}
+
+	public void Throw(Vector3 throwVel, bool voluntary)
 	{
 		throwVel *= ThrowVelMult;
 		throwVel.x += physics.Up.x * ThrowSpeed;
@@ -66,6 +90,7 @@ public class TorchController : MonoBehaviour, ITickable {
 		physics.SetVelocity(throwVel);
 
 		IsHeld = false;
+		WasThrown = voluntary;
 	}
 
 }
