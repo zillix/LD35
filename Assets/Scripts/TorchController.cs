@@ -38,7 +38,7 @@ public class TorchController : MonoBehaviour, ITickable {
 	public int WolfHitShakeDurationFrames = 30;
 
 	public SpriteRenderer spriteRender;
-	
+	public SoundBank sounds;
 
 	void Start()
 	{
@@ -51,7 +51,9 @@ public class TorchController : MonoBehaviour, ITickable {
 		Vector3 startVec = player.transform.position + Physics.Up * HeldDistOFfGround;
 		startVec.z = 0;
 		transform.position = startVec;
-		
+
+		sounds = GameObject.Find("SoundBank").GetComponent<SoundBank>();
+
 	}
 
 	public void TickFrame()
@@ -95,7 +97,15 @@ public class TorchController : MonoBehaviour, ITickable {
 				Physics.SetUp(Vector2.up);
 
 			}
+
+			bool wasGrounded = Physics.IsGrounded;
 			Physics.TickFrame();
+
+			if (!wasGrounded && Physics.IsGrounded)
+			{
+				sounds.player.PlayOneShot(sounds.torchLand);
+			}
+
 			transform.position = Physics.Position;
 
 			foreach (LanternController lantern in GameManager.instance.Lanterns)

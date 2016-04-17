@@ -54,10 +54,17 @@ public class IntroManager : MonoBehaviour {
 
 	private bool endingEnabled = false;
 
+	private SoundBank sounds;
+
 	public void Awake()
 	{
 		WolfHiding = true;
 
+	}
+
+	public void Start()
+	{
+		sounds = GameObject.Find("SoundBank").GetComponent<SoundBank>();
 	}
 
 	public void Init()
@@ -284,6 +291,7 @@ public class IntroManager : MonoBehaviour {
 	{
 		WolfHiding = false;
 		BattleStarted = true;
+		sounds.player.PlayOneShot(sounds.awakenWolf);
 	}
 
 	public void OnWolfFlee()

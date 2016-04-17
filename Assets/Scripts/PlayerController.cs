@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 	public TorchController Torch;
 	private Renderer myrenderer;
 
+	private SoundBank sounds;
+
 	public Direction facing = Direction.Right;
 	public Side Side { get; private set; }
 	public bool IsInside {  get { return Side == Side.Inside; } }
@@ -55,6 +57,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 		Physics = GetComponent<PlayerPhysicsController>();
 		animator = GetComponent<Animator>();
 		myrenderer = GetComponentInChildren(typeof(Renderer)) as Renderer;
+		sounds = GameObject.Find("SoundBank").GetComponent<SoundBank>();
 	}
 
 	// Use this for initialization
@@ -74,6 +77,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 		{
 			Debug.Log("Dodge pressed");
 			Physics.Dodge(facing == Direction.Left ? -1 : 1);
+			sounds.player.PlayOneShot(sounds.dash);
 		}
 
 
@@ -91,6 +95,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 				&& GameManager.instance.introManager.AllTorchesLit)
 		{
 			Physics.Flip();
+			sounds.player.PlayOneShot(sounds.flipScreen);
 			facing = facing == Direction.Left ? Direction.Right : Direction.Left;
 			Side = IsInside ? Side.Outside : Side.Inside;
 		}
@@ -144,8 +149,10 @@ public class PlayerController : MonoBehaviour, ITickable {
 		}
 		//Physics.DisableGravity = IsInside;
 
-
+		bool wasGrounded = Physics.IsGrounded;
 		Physics.TickFrame();
+
+	
 
 
 
@@ -248,6 +255,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 			return;
 		}
 
+		sounds.player.PlayOneShot(sounds.bopNose);
+
 		// Knock back
 		Vector3 knockBack = Vector3.zero;
 
@@ -285,6 +294,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 		{
 			return;
 		}
+
+		sounds.player.PlayOneShot(sounds.getHit);
 
 		GameManager.instance.mainCamera.BeginCameraShake(PlayerHitShakeDurationFrames, PlayerHitShakeMagnitude);
 

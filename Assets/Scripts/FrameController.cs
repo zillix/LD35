@@ -30,18 +30,21 @@ public class FrameController : MonoBehaviour {
 			lastFrameTime += framesToTick * Time.fixedDeltaTime;
 		}
 
-		if (Input.GetButtonDown("freeze"))
+		if (GameManager.DEBUG)
 		{
-			paused = !paused;
-			if (!paused)
+			if (Input.GetButtonDown("freeze"))
 			{
-				lastFrameTime = Time.time;
+				paused = !paused;
+				if (!paused)
+				{
+					lastFrameTime = Time.time;
+				}
 			}
-		}
 
-		if (paused && Input.GetButtonDown("step"))
-		{
-			tick();
+			if (paused && Input.GetButtonDown("step"))
+			{
+				tick();
+			}
 		}
 	}
 

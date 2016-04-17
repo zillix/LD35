@@ -11,6 +11,7 @@ public class TextManager : MonoBehaviour {
 
 	private ITextBox textBox;
 	public GameObject textBoxObject;
+	private SoundBank sounds;
 
 	void Awake()
 	{
@@ -23,6 +24,8 @@ public class TextManager : MonoBehaviour {
 		textBox = (ITextBox)textBoxObject.GetComponent (typeof(ITextBox));
 		textBoxObject.SetActive (true);
 		textBox.hide ();
+
+		sounds = GameObject.Find("SoundBank").GetComponent<SoundBank>();
 	}
 	
 	// Update is called once per frame
@@ -86,6 +89,7 @@ public class TextManager : MonoBehaviour {
 		if (textQueue.Count > 0) {
 			if (textQueue[0].text.Length > 0)
 			{
+				sounds.player.PlayOneShot(sounds.textBubble, .2f);
 				textBox.show();
 			}
 			currentText = textQueue [0];

@@ -21,10 +21,13 @@ public class LanternController : MonoBehaviour, ITickable {
 	public bool IsLit { get; private set; }
 	public bool IsFlaring {  get { return flareFramesRemaining > 0; } }
 
+
+	private SoundBank sounds;
 	void Awake()
 	{
 		IsLit = false;
 		animator = GetComponentInChildren<Animator>();
+		sounds = GameObject.Find("SoundBank").GetComponent<SoundBank>();
 	}
 
 	void Start()
@@ -69,6 +72,7 @@ public class LanternController : MonoBehaviour, ITickable {
 		if (!IsLit)
 		{
 			GameManager.instance.introManager.OnTorchLit();
+			sounds.player.PlayOneShot(sounds.lightLantern);
 		}
 		IsLit = true;
 		flareFramesRemaining = MaxFlareFrames;

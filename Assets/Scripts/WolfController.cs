@@ -45,6 +45,8 @@ public class WolfController : MonoBehaviour, ITickable {
 	public int FleeCameraShakeFrames = 60;
 	public float FleeCameraShakeMagnitude = 1f;
 
+	private SoundBank sounds;
+
 
 	void Awake()
 	{
@@ -53,6 +55,8 @@ public class WolfController : MonoBehaviour, ITickable {
 		movement = GetComponent<WolfMovementController>();
 		projector = GetComponentInChildren<Projector>();
 		HitsRemaining = TotalHits;
+
+		sounds = GameObject.Find("SoundBank").GetComponent<SoundBank>();
 
 	}
 
@@ -299,10 +303,20 @@ public class WolfController : MonoBehaviour, ITickable {
 	public void ReceiveDamage()
 	{
 
-
+		
 		setState(WolfState.RecoilHit);
 		enraged = true;
 		HitsRemaining--;
+
+		if (HitsRemaining > 0)
+		{
+			sounds.player.PlayOneShot(sounds.damageWolf, .7f);
+		}
+		else
+		{
+			sounds.player.PlayOneShot(sounds.killWolf);
+		}
+
 		GameManager.instance.introManager.OnWolfDamage();
 	}
 
