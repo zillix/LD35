@@ -23,10 +23,9 @@ public class WolfTongue : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		LanternController lantern = other.gameObject.GetComponent<LanternController>();
-        if (lantern.IsFlaring)
+		TorchController torch = other.gameObject.GetComponent<TorchController>();
+        if (torch != null && !torch.IsHeld)
 		{
-			lantern.Extinguish();
 			wolf.ReceiveDamage();
 		}
 	}

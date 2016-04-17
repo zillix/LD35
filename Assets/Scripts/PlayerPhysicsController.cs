@@ -12,14 +12,15 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 	public Vector3 Friction = new Vector3(20, 2);
 	public Vector3 MaxSpeed = new Vector3(25, 20);
 	public float DodgeSpeed = 20;
-	public float Gravity = -20f;
+	public float GroundGravity = -20f;
+	public float AirGravity = -20f;
 	public float HoverDist = .05f;
 	public float RaycastDist = .06f;
 	public int MaxDodgeFrames = 10;
 	
 	public bool IsGrounded
 	{
-		get; private set;
+		get; set;
 	}
 
 	public Vector3 Up { get; private set; }
@@ -38,6 +39,8 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 
 	public bool IsDodging {  get { return currentDodgeFrames > 0; } }
 
+	public bool UncapSpeeds { get; set; }
+
 	void Awake()
 	{
 		Velocity = Vector3.zero;
@@ -50,8 +53,16 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 	{
 		if (!DisableGravity)
 		{
-			Velocity.x += Gravity * Up.x * Time.fixedDeltaTime;
-			Velocity.y += Gravity * Up.y * Time.fixedDeltaTime;
+			if (IsGrounded)
+			{
+				Velocity.x += GroundGravity * Up.x * Time.fixedDeltaTime;
+				Velocity.y += GroundGravity * Up.y * Time.fixedDeltaTime;
+			}
+			else
+			{
+				Velocity.x += AirGravity * Up.x * Time.fixedDeltaTime;
+				Velocity.y += AirGravity * Up.y * Time.fixedDeltaTime;
+			}
 		}
 
 		Velocity.x += acceleration.x * Right.x * Time.fixedDeltaTime;
@@ -60,16 +71,19 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		float rightDot = Vector3.Dot(Velocity, Right);
 
 		// Cap velocity at max speed
-		float maxSpeedX = IsDodging ? DodgeSpeed : MaxSpeed.x;
-		if (rightDot >maxSpeedX)
+		if (!UncapSpeeds)
 		{
-			float upDot = Vector3.Dot(Velocity, Up);
-			Velocity = upDot * Up + (Vector3)(maxSpeedX * Right);
-		}
-		else if (rightDot < -maxSpeedX)
-		{
-			float upDot = Vector3.Dot(Velocity, Up);
-			Velocity = upDot * Up + (Vector3) (-maxSpeedX * Right);
+			float maxSpeedX = IsDodging ? DodgeSpeed : MaxSpeed.x;
+			if (rightDot > maxSpeedX)
+			{
+				float upDot = Vector3.Dot(Velocity, Up);
+				Velocity = upDot * Up + (Vector3)(maxSpeedX * Right);
+			}
+			else if (rightDot < -maxSpeedX)
+			{
+				float upDot = Vector3.Dot(Velocity, Up);
+				Velocity = upDot * Up + (Vector3)(-maxSpeedX * Right);
+			}
 		}
 
 		// Recalculate velocity
@@ -93,26 +107,36 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 			}
 		}
 
-		RaycastHit2D hit = Physics2D.Raycast(Position, Up * -1, RaycastDist, groundLayerMask);
-		if (hit.collider != null)
+		// Don't check feet if moving up
+		if (Vector3.Dot(Velocity, Up) < .1f)
 		{
-			if (hit.distance == 0)
+			RaycastHit2D hit = Physics2D.Raycast(Position, Up * -1, RaycastDist, groundLayerMask);
+			if (hit.collider != null)
 			{
-				Debug.LogWarning("Collision with dist 0");
+				if (hit.distance == 0)
+				{
+					Debug.LogWarning("Collision with dist 0");
+				}
+				surface = hit.collider;
+				Up = hit.normal;
+
+				IsGrounded = true;
+				UncapSpeeds = false;
+
+				Position += Up * -1 * (hit.distance - HoverDist);
+				// Set position to the collision point
+				//position = hit.point;
+
+				// Cancel out velocity parallel to the normal
+				float dot = Vector3.Dot(Velocity, hit.normal);
+				Vector3 normalProjection = dot * hit.normal;
+				Velocity -= normalProjection;
 			}
-			surface = hit.collider;
-			Up = hit.normal;
+			else
+			{
+				IsGrounded = false;
 
-			IsGrounded = true;
-
-			Position += Up * -1 * (hit.distance - HoverDist);
-			// Set position to the collision point
-			//position = hit.point;
-
-			// Cancel out velocity parallel to the normal
-			float dot = Vector3.Dot(Velocity, hit.normal);
-			Vector3 normalProjection = dot * hit.normal;
-			Velocity -= normalProjection;
+			}
 		}
 		else
 		{
@@ -125,6 +149,9 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		}
 
 		currentDodgeFrames--;
+
+		Up = new Vector3(Up.x, Up.y, 0);
+		Position.z = 0;
 	}
 
 	private void movePosition()
@@ -198,6 +225,7 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 	{
 		if (IsDodging)
 		{
+			Debug.Log("Dodge ignored");
 			return;
 		}
 		float speed = direction * DodgeSpeed;

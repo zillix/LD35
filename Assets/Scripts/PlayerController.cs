@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 	private Animator animator;
 
 	public TorchController Torch;
+	private Renderer myrenderer;
 
 	private Direction facing = Direction.Right;
 	public Side Side { get; private set; }
@@ -31,11 +32,21 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 	public bool IsTorchHeld {  get { return Torch.IsHeld;  } }
 
+	public float BlinkFrequency = .3f;
+	public int MaxBlinks = 5;
+	private int blinksLeft = 0;
+
+	public Vector3 KnockBackAmount = new Vector3(-5f, 10f);
+	public Vector3 BopKnockBackAmount = new Vector3(-5f, -10f);
+
+	public bool IsInvincible {  get { return blinksLeft > 0; } }
+
 	void Awake()
 	{
 		Side = Side.Inside;
 		Physics = GetComponent<PlayerPhysicsController>();
 		animator = GetComponent<Animator>();
+		myrenderer = GetComponentInChildren(typeof(Renderer)) as Renderer;
 	}
 
 	// Use this for initialization
@@ -43,24 +54,41 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 		GameManager.instance.player = this;
 	}
-	
-	// Update is called once per frame
-	public void TickFrame () {
-		if (input.GetButtonDown(Button.Dodge))
+
+	void Update()
+	{
+		if (input.GetButtonDown(Button.Dodge) && Physics.IsGrounded)
 		{
+			Debug.Log("Dodge pressed");
 			Physics.Dodge(facing == Direction.Left ? -1 : 1);
 		}
 
+
+
+		if (IsInside
+			&& IsTorchHeld
+			&& input.GetButtonDown(Button.Up))
+		{
+			throwTorch();
+		}
+
+		if (!Physics.IsDodging
+			&& Physics.IsGrounded
+				&& input.GetButtonDown(Button.Flip))
+		{
+			Physics.Flip();
+			facing = facing == Direction.Left ? Direction.Right : Direction.Left;
+			Side = IsInside ? Side.Outside : Side.Inside;
+		}
+    }
+	
+	// Update is called once per frame
+	public void TickFrame () {
+		
+
 		if (!Physics.IsDodging)
 		{
-			if (Physics.IsGrounded
-				&& input.GetButtonDown(Button.Flip))
-			{
-				Physics.Flip();
-				facing = facing == Direction.Left ? Direction.Right : Direction.Left;
-				Side = IsInside ? Side.Outside : Side.Inside;
-			}
-			else
+			if (!IsInvincible || Physics.IsGrounded)
 			{
 				if (input.GetButton(Button.Left))
 				{
@@ -76,13 +104,10 @@ public class PlayerController : MonoBehaviour, ITickable {
 				{
 					Physics.Move(0);
 				}
-
-				if (IsInside
-					&& IsTorchHeld
-					&& input.GetButtonDown(Button.Up))
-				{
-					throwTorch();
-				}
+			}
+			else
+			{
+				Physics.Move(0);
 			}
 
 			if (facing == Direction.Left)
@@ -94,10 +119,20 @@ public class PlayerController : MonoBehaviour, ITickable {
 				transform.localScale = new Vector3(1, 1, 1);
 			}
 		}
-		Physics.DisableGravity = IsInside;
+		//Physics.DisableGravity = IsInside;
 
 
 		Physics.TickFrame();
+
+
+		if (!Physics.IsGrounded && IsOutside)
+		{
+			// This is garbage
+			// basically says don't go flying off
+			Physics.SetUp(transform.position.normalized);
+		}
+
+
 		animator.SetBool("Dodging", Physics.IsDodging);
 		animator.SetFloat("Speed", Mathf.Abs(Physics.Velocity.magnitude));
 
@@ -125,5 +160,111 @@ public class PlayerController : MonoBehaviour, ITickable {
 	private void throwTorch()
 	{
 		Torch.Throw(Physics.Velocity);
+	}
+
+	public void OnTriggerEnter2D(Collider2D collider)
+	{
+		if (collider.gameObject.layer == LayerMask.NameToLayer("Teeth")
+			||
+			collider.gameObject.layer == LayerMask.NameToLayer("Wolf"))
+		{
+			ReceiveHit();
+		}
+
+		if (collider.gameObject.layer == LayerMask.NameToLayer("Nose"))
+		{
+			BopNose();
+		}
+
+    }
+
+	public void OnTriggerStay2D(Collider2D collider)
+	{
+		if (collider.gameObject.layer == LayerMask.NameToLayer("Teeth")
+			||
+			collider.gameObject.layer == LayerMask.NameToLayer("Wolf"))
+		{
+			ReceiveHit();
+		}
+
+		if (collider.gameObject.layer == LayerMask.NameToLayer("Nose"))
+		{
+			BopNose();
+        }
+	}
+
+	private void BopNose()
+	{
+		if (IsInvincible)
+		{
+			return;
+		}
+
+		// Knock back
+		Vector3 knockBack = Vector3.zero;
+
+		float knockbackAmountX = facing == Direction.Right ? BopKnockBackAmount.x : -BopKnockBackAmount.x;
+
+		// right component
+		knockBack.x += knockbackAmountX * Physics.Right.x;
+		knockBack.y += knockbackAmountX * Physics.Right.y;
+
+		knockBack.x += BopKnockBackAmount.y * Physics.Up.x;
+		knockBack.y += BopKnockBackAmount.y * Physics.Up.y;
+
+		facing = facing == Direction.Left ? Direction.Right : Direction.Left;
+
+		Physics.SetVelocity(knockBack);
+		Physics.IsGrounded = false;
+		Physics.UncapSpeeds = true;
+	}
+
+	private void ReceiveHit()
+	{
+		if (IsInvincible)
+		{
+			return;
+		}
+
+		if (IsTorchHeld && IsInside)
+		{
+			throwTorch();
+		}
+
+		// Knock back
+		Vector3 knockBack = Vector3.zero;
+
+		float knockbackAmountX = facing == Direction.Right ? KnockBackAmount.x : -KnockBackAmount.x;
+
+		// right component
+		knockBack.x += knockbackAmountX * Physics.Right.x;
+		knockBack.y += knockbackAmountX * Physics.Right.y;
+		// up
+
+		if (Physics.IsGrounded)
+		{
+			knockBack.x += KnockBackAmount.y * Physics.Up.x;
+			knockBack.y += KnockBackAmount.y * Physics.Up.y;
+		}
+
+		Physics.SetVelocity(knockBack);
+		Physics.IsGrounded = false;
+		Physics.UncapSpeeds = true;
+
+		facing = facing == Direction.Left ? Direction.Right : Direction.Left;
+
+		blinksLeft = MaxBlinks;
+		InvokeRepeating("Blink", BlinkFrequency, BlinkFrequency);
+	}
+
+	private void Blink()
+	{
+		myrenderer.enabled = !myrenderer.enabled;
+		if (--blinksLeft == 0)
+		{
+			CancelInvoke("Blink");
+			myrenderer.enabled = true;
+			Physics.UncapSpeeds = false;
+		}
 	}
 }

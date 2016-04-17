@@ -17,7 +17,7 @@ public class LanternController : MonoBehaviour, ITickable {
 
 	void Awake()
 	{
-
+		IsLit = false;
 	}
 
 	public void TickFrame () {

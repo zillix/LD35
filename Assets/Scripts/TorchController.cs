@@ -32,6 +32,7 @@ public class TorchController : MonoBehaviour, ITickable {
 			physics.SetUp(player.Physics.Up);
 			physics.Position = transform.position;
 			physics.SetVelocity(Vector3.zero);
+			physics.IsGrounded = false;
 		}
 		else
 		{

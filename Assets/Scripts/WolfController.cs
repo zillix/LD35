@@ -25,12 +25,39 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	public WolfStateData[] DataList = new WolfStateData[0];
 
+	private bool enraged = true;
+
+	public GameObject EyeBlurPrefab;
+	public GameObject eye;
+
+	public Material EnragedNoseMaterial;
+	private Material initialNoseMaterial;
+	public GameObject Nose;
+	private Renderer noseRenderer;
+
+	public float EyeBlurFrequency = .2f;
+
+	private GameObject dynamicObjects;
+
 	void Awake()
 	{
 		animator = GetComponentInChildren<Animator>();
 		animator.applyRootMotion = false;
 		movement = GetComponent<WolfMovementController>();
 		hitsRemaining = TotalHits;
+
+		InvokeRepeating("EyeBlur", EyeBlurFrequency, EyeBlurFrequency);
+	}
+
+	void EyeBlur()
+	{
+		if (enraged)
+		{
+			GameObject blur = Instantiate(EyeBlurPrefab);
+			blur.transform.position = eye.transform.position;
+			blur.transform.rotation = eye.transform.rotation;
+			blur.transform.SetParent(dynamicObjects.transform, true);
+		}
 	}
 
 	void Start()
@@ -38,6 +65,9 @@ public class WolfController : MonoBehaviour, ITickable {
 
 		player = GameObject.FindObjectOfType<PlayerController>();
 		setState(WolfState.Idle);
+		noseRenderer = Nose.GetComponent<Renderer>();
+		initialNoseMaterial = noseRenderer.material;
+		dynamicObjects = GameObject.Find("DynamicObjects");
 	}
 
 
@@ -50,6 +80,15 @@ public class WolfController : MonoBehaviour, ITickable {
 		transform.rotation = rotation;
 
 		updateState();
+
+		if (enraged)
+		{
+			noseRenderer.material = EnragedNoseMaterial;
+		}
+		else
+		{
+			noseRenderer.material = initialNoseMaterial;
+		}
 
 	}
 
@@ -226,6 +265,12 @@ public class WolfController : MonoBehaviour, ITickable {
 	public void ReceiveDamage()
 	{
 		setState(WolfState.RecoilHit);
+		enraged = false;
+	}
+
+	public void GetBopped()
+	{
+		enraged = true;
 	}
 }
 
