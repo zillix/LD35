@@ -30,7 +30,7 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	public WolfStateData[] DataList = new WolfStateData[0];
 
-	private bool enraged = false;
+	public bool enraged = false;
 
 	public Material EnragedNoseMaterial;
 	private Material initialNoseMaterial;
@@ -42,6 +42,8 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	private Projector projector;
 
+	public int FleeCameraShakeFrames = 60;
+	public float FleeCameraShakeMagnitude = 1f;
 
 
 	void Awake()
@@ -49,7 +51,7 @@ public class WolfController : MonoBehaviour, ITickable {
 		animator = GetComponentInChildren<Animator>();
 		animator.applyRootMotion = false;
 		movement = GetComponent<WolfMovementController>();
-		projector = GetComponent<Projector>();
+		projector = GetComponentInChildren<Projector>();
 		HitsRemaining = TotalHits;
 
 	}
@@ -61,7 +63,7 @@ public class WolfController : MonoBehaviour, ITickable {
 		setState(WolfState.Assess);
 		noseRenderer = Nose.GetComponent<Renderer>();
 		initialNoseMaterial = noseRenderer.material;
-		projector.transform.SetParent(GameManager.instance.transform, true);
+	//	projector.transform.SetParent(GameManager.instance.transform, true);
 	}
 	public void Update()
 	{
@@ -99,7 +101,7 @@ public class WolfController : MonoBehaviour, ITickable {
 
 		animator.SetBool("Enraged", enraged);
 
-		projector.transform.position = transform.position;
+		//projector.transform.position = transform.position;
 
 	}
 
@@ -198,9 +200,11 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	private void advanceState()
 	{
-		if (stateData.state == WolfState.Flee)
+		if (stateData.state == WolfState.Flee
+			&& !GameManager.instance.introManager.wolfFled)
 		{
 			GameManager.instance.OnWolfFleed();
+			GameManager.instance.mainCamera.BeginCameraShake(FleeCameraShakeFrames, FleeCameraShakeMagnitude);
 			return;
 		}
 
@@ -299,6 +303,7 @@ public class WolfController : MonoBehaviour, ITickable {
 		setState(WolfState.RecoilHit);
 		enraged = true;
 		HitsRemaining--;
+		GameManager.instance.introManager.OnWolfDamage();
 	}
 
 	public void GetBopped()

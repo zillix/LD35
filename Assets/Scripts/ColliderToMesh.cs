@@ -11,7 +11,9 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class ColliderToMesh : MonoBehaviour
 {
-	
+	public bool Reverse = false;
+	public bool ReverseNormals = false;
+
 	void Start()
 	{
 		CreateMesh();
@@ -36,6 +38,15 @@ public class ColliderToMesh : MonoBehaviour
 			return;
 		}
 
+		if (Reverse)
+		{
+			Vector2[] pathCopy = path;
+			for (int i = 0; i < path.Length; ++i)
+			{
+				pathCopy[i] = path[path.Length - 1 - i];
+			}
+		}
+
 		MeshFilter mf = GetComponent<MeshFilter>();
 		Mesh mesh = new Mesh();
 		Triangulator tr = new Triangulator(path);
@@ -54,6 +65,16 @@ public class ColliderToMesh : MonoBehaviour
 		mesh.triangles = indices;
 		mesh.uv = uvs;
 		mesh.RecalculateNormals();
+
+		if (Reverse)
+		{
+			for (int i = 0; i < mesh.normals.Length; ++i)
+			{
+				Vector3 normal = mesh.normals[i];
+				normal *= -1f;
+				mesh.normals[i] = normal;
+			}
+		}
 
 
 		mesh.RecalculateBounds();

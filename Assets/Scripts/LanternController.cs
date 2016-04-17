@@ -9,15 +9,22 @@ public class LanternController : MonoBehaviour, ITickable {
 	public float FlareLightAura = 6f;
 	public int LightAuraPixels = 64;
 	public int PPU = 16;
+
+	private Animator animator;
 	
 	private int flareFramesRemaining = 10;
-	
+
+	public float AuraDelta = 1f;
+	public float AuraAngleSpeed = 180f;
+	private float currentAuraAngle = 0f;
+
 	public bool IsLit { get; private set; }
 	public bool IsFlaring {  get { return flareFramesRemaining > 0; } }
 
 	void Awake()
 	{
 		IsLit = false;
+		animator = GetComponentInChildren<Animator>();
 	}
 
 	void Start()
@@ -27,6 +34,9 @@ public class LanternController : MonoBehaviour, ITickable {
 	}
 
 	public void TickFrame () {
+
+		animator.SetBool("Lit", IsLit);
+
 		Vector3 up = GameManager.instance.Up;
 		if (!GameManager.instance.introManager.RotateWorld)
 		{
@@ -38,10 +48,14 @@ public class LanternController : MonoBehaviour, ITickable {
 
 		flareFramesRemaining--;
 
+		currentAuraAngle += Time.fixedDeltaTime * AuraAngleSpeed;
+
+
 		float auraSize = 0;
 		if (IsLit)
 		{
 			auraSize = IsFlaring ? FlareLightAura : SmallLightAura;
+			auraSize += Mathf.Cos(Mathf.Deg2Rad * currentAuraAngle) * AuraDelta;
 		}
 
 		float startSize =(float)LightAuraPixels / PPU;

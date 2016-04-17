@@ -58,10 +58,14 @@ public class GameManager : MonoBehaviour, ITickable {
 
 	public void OnFlip()
 	{
+		introManager.OnFlip();
+
 		if (flippedOnce)
 		{
 			return;
 		}
+
+		introManager.InvertInteriorCamera = true;
 
 		flippedOnce = true;
 
@@ -87,6 +91,9 @@ public class GameManager : MonoBehaviour, ITickable {
 			{
 				introManager.StartIntro();
 			}
+
+			mainCamera.TickFrame();
+			player.TickFrame();
 			return;
 		}
 
@@ -119,6 +126,6 @@ public class GameManager : MonoBehaviour, ITickable {
 
 	public void OnWolfFleed()
 	{
-		// do something
+		introManager.OnWolfFlee();
 	}
 }

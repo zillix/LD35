@@ -26,10 +26,10 @@ public class WolfTongue : MonoBehaviour {
 		if (wolf.State == WolfState.Bite)
 		{
 			TorchController torch = other.gameObject.GetComponent<TorchController>();
-			if (torch != null && !torch.IsHeld && torch.IsLit)
+			if (torch != null && !torch.IsHeld && torch.IsLit && torch.WasThrown)
 			{
 				wolf.ReceiveDamage();
-				torch.Extinguish();
+				torch.OnHitWolf();
 			}
 		}
 	}
@@ -39,10 +39,10 @@ public class WolfTongue : MonoBehaviour {
 		if (wolf.State == WolfState.Bite)
 		{
 			TorchController torch = other.gameObject.GetComponent<TorchController>();
-			if (torch != null && !torch.IsHeld && torch.IsLit)
+			if (torch != null && !torch.IsHeld && torch.IsLit && torch.WasThrown)
 			{
 				wolf.ReceiveDamage();
-				torch.Extinguish();
+				torch.OnHitWolf();
 			}
 		}
 	}

@@ -22,10 +22,16 @@ public class CameraController : MonoBehaviour, ITickable {
 
 	private Camera mainCamera;
 
+	private float cameraShakeMagnitude;
+	private float cameraShakeFramesRemaining;
+
 	// Use this for initialization
 	void Start () {
 		player = GameManager.instance.player;
 		transform.position = calculateTargetPosition();
+		Vector3 newPos = transform.position;
+		newPos.z = -10;
+		transform.position = newPos;
 		mainCamera = GetComponent<Camera>();
 		mainCamera.orthographicSize = InsideOrtho;
 	}
@@ -113,6 +119,14 @@ public class CameraController : MonoBehaviour, ITickable {
 			}
 		}
 
+
+		if (cameraShakeFramesRemaining > 0)
+		{
+			cameraShakeFramesRemaining--;
+			Vector3 shakeOffset = Random.Range(-cameraShakeMagnitude, cameraShakeMagnitude) * MathUtil.AngleToVector(Random.Range(-180, 180));
+			newPos += shakeOffset;
+		}
+
 		transform.position = newPos;
 
 
@@ -147,7 +161,14 @@ public class CameraController : MonoBehaviour, ITickable {
 		}
 
 		targetPosition.y += player.RotationUp.y * offset.y;
+		targetPosition.x += player.RotationUp.x * offset.y;
 
 		return targetPosition;
+	}
+
+	public void BeginCameraShake(int frames, float magnitude)
+	{
+		cameraShakeMagnitude = magnitude;
+		cameraShakeFramesRemaining = frames;
 	}
 }

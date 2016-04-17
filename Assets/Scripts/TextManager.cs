@@ -84,7 +84,10 @@ public class TextManager : MonoBehaviour {
 		}
 
 		if (textQueue.Count > 0) {
-			textBox.show();
+			if (textQueue[0].text.Length > 0)
+			{
+				textBox.show();
+			}
 			currentText = textQueue [0];
 			textQueue.RemoveAt (0);
 			textBox.text = currentText.text;

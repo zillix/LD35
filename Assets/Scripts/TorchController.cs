@@ -7,6 +7,7 @@ public class TorchController : MonoBehaviour, ITickable {
 
 	public float GrabDist = 5;
 	public float HeldDistOFfGround = .5f;
+	public float HeldDistForward = .5f;
 	public float ThrowVelMult = 1.5f;
 	public float LanternLightDist = 2f;
 
@@ -21,11 +22,28 @@ public class TorchController : MonoBehaviour, ITickable {
 
 	public GameObject LightAura;
 
+	public int LightAuraPixels = 64;
+	public int PPU = 16;
+	public float LightAuraSize = 8f;
+
 	public float ThrowSpeed = 20f;
+
+	public float AuraDelta = 1f;
+	public float AuraAngleSpeed = 180f;
+	private float currentAuraAngle = 0f;
+
+	public GameObject ExplosionPrefab;
+
+	public float WolfHitShakeMagnitude = 5f;
+	public int WolfHitShakeDurationFrames = 30;
+
+	public SpriteRenderer spriteRender;
+	
 
 	void Start()
 	{
 		player = GameObject.FindObjectOfType<PlayerController>();
+		spriteRender = GetComponent<SpriteRenderer>();
 		Physics = GetComponent<PlayerPhysicsController>();
 		IsHeld = true;
 		emitter = GetComponent<GameEmitter>();
@@ -48,11 +66,22 @@ public class TorchController : MonoBehaviour, ITickable {
 			LightAura.GetComponentInChildren<Renderer>().enabled = true;
 		}*/
 
-		emitter.EmitActive = !IsLit;
+		if (player.IsInside)
+		{ LightAura.GetComponentInChildren<Renderer>().enabled = true;
+			spriteRender.enabled = true;
+		}
+		else
+		{
+			LightAura.GetComponentInChildren<Renderer>().enabled = false;
+			spriteRender.enabled = false;
+		}
+
+		emitter.EmitActive = !IsHeld && Physics.IsGrounded;
 
 		if (IsHeld)
 		{
 			transform.position = player.transform.position + Physics.Up * HeldDistOFfGround;
+			transform.position += ((player.facing == Direction.Right) ? Physics.Right : -Physics.Right) * HeldDistForward;
 			transform.rotation = player.transform.rotation;
 			Physics.SetUp(player.Physics.Up);
 			Physics.Position = transform.position;
@@ -80,6 +109,20 @@ public class TorchController : MonoBehaviour, ITickable {
 
 		}
 
+
+		currentAuraAngle += Time.fixedDeltaTime * AuraAngleSpeed;
+		float auraSize = 0;
+		if (IsLit)
+		{
+			auraSize = LightAuraSize;
+			auraSize += Mathf.Cos(Mathf.Deg2Rad * currentAuraAngle) * AuraDelta;
+		}
+
+		float startSize = (float)LightAuraPixels / PPU;
+		float scale = auraSize / startSize;
+		Vector3 lightScale = new Vector3(scale, scale, scale);
+		LightAura.transform.localScale = lightScale;
+
 		if (!IsHeld
 			&& Physics.IsGrounded
 			&& (player.transform.position - transform.position).magnitude < GrabDist)
@@ -99,11 +142,16 @@ public class TorchController : MonoBehaviour, ITickable {
 		LightAura.GetComponentInChildren<Renderer>().enabled = true;
 	}
 
-	public void Extinguish()
+	public void OnHitWolf()
 	{
-		IsLit = false;
+		//IsLit = false;
 
-		LightAura.GetComponentInChildren<Renderer>().enabled = false;
+		//LightAura.GetComponentInChildren<Renderer>().enabled = false;
+
+		GameObject explosion = Instantiate(ExplosionPrefab);
+		explosion.transform.position = transform.position;
+
+		GameManager.instance.mainCamera.BeginCameraShake(WolfHitShakeDurationFrames, WolfHitShakeMagnitude);
 	}
 
 	public void Throw(Vector3 throwVel, bool voluntary)

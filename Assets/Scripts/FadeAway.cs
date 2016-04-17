@@ -3,7 +3,7 @@ using System.Collections;
 
 public class FadeAway : MonoBehaviour {
 
-	public float FadeRate = 1f;
+	public float Fade = .5f;
 
 	// Use this for initialization
 	void Start () {
@@ -16,7 +16,7 @@ public class FadeAway : MonoBehaviour {
 		foreach (Renderer renderer in rendererObjects)
 		{
 			Color color = renderer.material.color;
-			color.a -= Time.fixedDeltaTime * FadeRate;
+			color.a -= Time.fixedDeltaTime * Fade;
 			renderer.material.color = color;
 			if (color.a <= 0)
 			{

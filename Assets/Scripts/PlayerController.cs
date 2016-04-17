@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 	public TorchController Torch;
 	private Renderer myrenderer;
 
-	private Direction facing = Direction.Right;
+	public Direction facing = Direction.Right;
 	public Side Side { get; private set; }
 	public bool IsInside {  get { return Side == Side.Inside; } }
 	public bool IsOutside {  get { return Side == Side.Outside; } }
@@ -40,6 +40,14 @@ public class PlayerController : MonoBehaviour, ITickable {
 	public Vector3 BopKnockBackAmount = new Vector3(-5f, -10f);
 
 	public bool IsInvincible {  get { return blinksLeft > 0; } }
+
+	public float ScaleSize = 2f;
+
+	public int PlayerHitShakeDurationFrames = 20;
+	public float PlayerHitShakeMagnitude = 3f;
+
+	public int WolfBopShakeDurationFrames = 20;
+	public float WolfBopShakeMagnitude = 3f;
 
 	void Awake()
 	{
@@ -77,9 +85,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 			throwTorch(true);
 		}
 
-		if (IsTorchHeld
-			&& Torch.IsLit
-			&& !Physics.IsDodging
+		if (!Physics.IsDodging
 			&& Physics.IsGrounded
 				&& input.GetButtonDown(Button.Flip)
 				&& GameManager.instance.introManager.AllTorchesLit)
@@ -129,11 +135,11 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 			if (facing == Direction.Left)
 			{
-				transform.localScale = new Vector3(-1, 1, 1);
+				transform.localScale = new Vector3(-ScaleSize, ScaleSize, ScaleSize);
 			}
 			else
 			{
-				transform.localScale = new Vector3(1, 1, 1);
+				transform.localScale = new Vector3(ScaleSize, ScaleSize, ScaleSize);
 			}
 		}
 		//Physics.DisableGravity = IsInside;
@@ -145,6 +151,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 		animator.SetBool("Dodging", Physics.IsDodging);
 		animator.SetFloat("Speed", Mathf.Abs(Physics.Velocity.magnitude));
+		animator.SetBool("Fox",IsOutside);
 
 		transform.position = Physics.Position;
 
@@ -266,6 +273,10 @@ public class PlayerController : MonoBehaviour, ITickable {
 		Physics.IsGrounded = false;
 
 		GameManager.instance.wolf.GetBopped();
+		GameManager.instance.introManager.OnWolfBopped();
+
+		GameManager.instance.mainCamera.BeginCameraShake(WolfBopShakeDurationFrames, WolfBopShakeMagnitude);
+
 	}
 
 	private void ReceiveHit()
@@ -275,10 +286,22 @@ public class PlayerController : MonoBehaviour, ITickable {
 			return;
 		}
 
+		GameManager.instance.mainCamera.BeginCameraShake(PlayerHitShakeDurationFrames, PlayerHitShakeMagnitude);
+
+
+		if (IsOutside)
+		{
+			GameManager.instance.introManager.OnOutsideHit();
+		}
+		else
+		{
+			GameManager.instance.introManager.OnInsideHit();
+		}
+
 		if (IsTorchHeld && IsInside)
 		{
 			throwTorch(false);
-			Torch.Extinguish();
+			//Torch.Extinguish();
 		}
 
 		// Knock back
@@ -319,6 +342,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 		blinksLeft = MaxBlinks;
 		InvokeRepeating("Blink", BlinkFrequency, BlinkFrequency);
 	}
+
 
 	private void Blink()
 	{

@@ -10,5 +10,8 @@ public class ColliderToMeshEditor : Editor {
 		{
 			((ColliderToMesh)target).CreateMesh();
 		}
+		ColliderToMesh mesh = target as ColliderToMesh;
+		mesh.Reverse = EditorGUILayout.Toggle("Reverse:", mesh.Reverse);
+		mesh.ReverseNormals = EditorGUILayout.Toggle("ReverseNormals:", mesh.ReverseNormals);
 	}
 }
