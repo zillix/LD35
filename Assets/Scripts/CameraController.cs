@@ -9,6 +9,7 @@ public class CameraController : MonoBehaviour, ITickable {
 
 	public Vector2 InsideOffset = new Vector2(0, 3);
 	public Vector2 OutsideOffset = new Vector2(0, -10);
+	public Vector2 AssessOffset = new Vector2(0, -6);
 	public float InsideDist = -10f;
 	public float OutsideDist = -20f;
 	public float ZoomSpeed = 12f;
@@ -91,7 +92,8 @@ public class CameraController : MonoBehaviour, ITickable {
 
 		float targetOrthographicSize = player.IsInside ? InsideOrtho : OutsideOrtho;
 
-		if (GameManager.instance.wolf.State == WolfState.Assess)
+		if (GameManager.instance.wolf != null
+			&& GameManager.instance.wolf.State == WolfState.Assess)
 		{
 			targetOrthographicSize = AssessOrtho;
 		}
@@ -137,7 +139,12 @@ public class CameraController : MonoBehaviour, ITickable {
 		Vector3 targetPosition = player.transform.position;
 
 		Vector2 offset = player.IsInside ? InsideOffset : OutsideOffset;
-		targetPosition.x += player.RotationUp.x * offset.y;
+		if (GameManager.instance.wolf != null
+			&& GameManager.instance.wolf.State == WolfState.Assess)
+		{
+
+			offset = AssessOffset;
+		}
 
 		targetPosition.y += player.RotationUp.y * offset.y;
 

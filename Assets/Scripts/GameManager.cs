@@ -65,7 +65,10 @@ public class GameManager : MonoBehaviour, ITickable {
 
 		wolf = Instantiate(WolfPrefab).GetComponent<WolfController>();
 		wolf.transform.position = (player.transform.position.normalized * -2);
-		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(player.transform.position.normalized * -1) + 180);
+		Vector3 newpos = wolf.transform.position;
+		newpos.z = 0;
+		wolf.transform.position = newpos;
+		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(((Vector2)(player.transform.position)).normalized * -1) + 180);
 		wolf.transform.rotation = rotation;
 
 	}
@@ -102,9 +105,12 @@ public class GameManager : MonoBehaviour, ITickable {
 
 		fpsText.text = "FPS: " + fpsCounter.FPS;
 		frameText.text = "Current Frame: " + frameController.currentFrame;
-		frameText.text += "\n\nWolf State : " + wolf.State;
-		frameText.text += "\nWolf State Ticks: " + wolf.TicksLeftInState;
-		frameText.text += "\nWolf hits: " + wolf.HitsRemaining;
+		if (wolf != null)
+		{
+			frameText.text += "\n\nWolf State : " + wolf.State;
+			frameText.text += "\nWolf State Ticks: " + wolf.TicksLeftInState;
+			frameText.text += "\nWolf hits: " + wolf.HitsRemaining;
+		}
 		//frameText.text += "\nWolf Anim State: " + wolf.animator.GetCurrentAnimatorStateInfo(0).IsName;
 	}
 

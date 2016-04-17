@@ -68,7 +68,7 @@ public class WolfMovementController : MonoBehaviour, ITickable
 		}
 
 		position = position.normalized * currentRadius;
-		position.z = startZ;
+		position.z = 0;
 
 		transform.position = position;
 

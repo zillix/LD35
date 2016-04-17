@@ -54,7 +54,7 @@ public class IntroManager : MonoBehaviour {
 
 		text.enqueue("once, on a night of the full moon");
 		text.enqueue("wolf saw the moon in the sky, and decided:");
-		text.enqueue("\"I will eat the moon\"", 4);
+		text.enqueue("\"I shall eat the moon\"", 4);
 
 		text.enqueue("when fox heard this, he was upset");
 		text.enqueue("for fox loved to hunt by moonlight");

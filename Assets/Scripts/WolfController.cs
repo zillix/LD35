@@ -21,7 +21,7 @@ public class WolfController : MonoBehaviour, ITickable {
 	public float HowlDist = 47f;
 	public float SignalAttackDist = 52f;
 
-	public WolfState State { get { return stateData.state; } }
+	public WolfState State { get { return stateData == null ? WolfState.None : stateData.state; } }
 	private WolfStateData stateData;
 
 	public int TicksLeftInState { get; private set; }
@@ -55,7 +55,7 @@ public class WolfController : MonoBehaviour, ITickable {
 	{
 
 		player = GameObject.FindObjectOfType<PlayerController>();
-		setState(WolfState.Idle);
+		setState(WolfState.Assess);
 		noseRenderer = Nose.GetComponent<Renderer>();
 		initialNoseMaterial = noseRenderer.material;
 	}
