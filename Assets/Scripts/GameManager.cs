@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour, ITickable {
 	public void Start()
 	{
 		Lanterns = new List<LanternController>(FindObjectsOfType<LanternController>());
+		Application.targetFrameRate = 60;
 	}
 
 	public void TickFrame()

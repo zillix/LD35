@@ -94,6 +94,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 				transform.localScale = new Vector3(1, 1, 1);
 			}
 		}
+		Physics.DisableGravity = IsInside;
+
 
 		Physics.TickFrame();
 		animator.SetBool("Dodging", Physics.IsDodging);
@@ -103,9 +105,21 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 		transform.position = Physics.Position;
 
-		Vector3 up = Physics.Up;
-		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(up) - 90);
+		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(RotationUp) - 90);
 		transform.rotation = rotation;
+	}
+
+	public Vector3 RotationUp
+	{
+		get
+		{
+			Vector3 up = transform.position.normalized;
+			if (IsInside)
+			{
+				up *= -1;
+			}
+			return up;
+		}
 	}
 
 	private void throwTorch()

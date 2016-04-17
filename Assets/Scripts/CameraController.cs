@@ -14,6 +14,9 @@ public class CameraController : MonoBehaviour, ITickable {
 	public float ZoomSpeed = 12f;
 
 	public float lerpSpeed = 1f;
+	private float cameraAngle = 0;
+	public float InsideOrtho = 60f;
+	public float OutsideOrtho = 120f;
 
 	private Camera mainCamera;
 
@@ -22,6 +25,7 @@ public class CameraController : MonoBehaviour, ITickable {
 		player = GameManager.instance.player;
 		transform.position = calculateTargetPosition();
 		mainCamera = GetComponent<Camera>();
+		mainCamera.orthographicSize = InsideOrtho;
 	}
 	
 	// Update is called once per frame
@@ -82,16 +86,34 @@ public class CameraController : MonoBehaviour, ITickable {
 				newPos.z -= Time.fixedDeltaTime * ZoomSpeed;
 			}
 		}
+
+		float targetOrthographicSize = player.IsInside ? InsideOrtho : OutsideOrtho;
+		if (Mathf.Abs(mainCamera.orthographicSize - targetOrthographicSize) < Time.fixedDeltaTime * ZoomSpeed)
+		{
+			mainCamera.orthographicSize = targetOrthographicSize;
+		}
+		else
+		{
+			if (targetOrthographicSize > mainCamera.orthographicSize)
+			{
+				mainCamera.orthographicSize += Time.fixedDeltaTime * ZoomSpeed;
+			}
+			else
+			{
+				mainCamera.orthographicSize -= Time.fixedDeltaTime * ZoomSpeed;
+			}
+		}
+
 		transform.position = newPos;
 
-		Quaternion targetRotation = player.transform.rotation;
-		if (player.Side== Side.Inside)
+		float targetAngle = MathUtil.VectorToAngle(player.transform.position) + 270;
+		if (player.IsInside)
 		{
-			Vector3 eulers = targetRotation.eulerAngles;
-			eulers.z += 180;
-			targetRotation.eulerAngles = eulers;
+			//targetAngle += 180;
 		}
-		transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, lerpSpeed);
+		cameraAngle = MathUtil.RotateAngle(cameraAngle, targetAngle, lerpSpeed * Time.fixedDeltaTime);
+
+		transform.rotation = Quaternion.Euler(0, 0, cameraAngle);
 	}
 
 	private Vector3 calculateTargetPosition()
@@ -99,9 +121,9 @@ public class CameraController : MonoBehaviour, ITickable {
 		Vector3 targetPosition = player.transform.position;
 
 		Vector2 offset = player.IsInside ? InsideOffset : OutsideOffset;
-		targetPosition.x += player.Physics.Up.x * offset.y;
+		targetPosition.x += player.RotationUp.x * offset.y;
 
-		targetPosition.y += player.Physics.Up.y * offset.y;
+		targetPosition.y += player.RotationUp.y * offset.y;
 
 		return targetPosition;
 	}

@@ -34,6 +34,8 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 
 	int groundLayerMask;
 
+	public bool DisableGravity = false;
+
 	public bool IsDodging {  get { return currentDodgeFrames > 0; } }
 
 	void Awake()
@@ -46,8 +48,11 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 
 	public void TickFrame()
 	{
-		Velocity.x += Gravity * Up.x * Time.fixedDeltaTime;
-		Velocity.y += Gravity * Up.y * Time.fixedDeltaTime;
+		if (!DisableGravity)
+		{
+			Velocity.x += Gravity * Up.x * Time.fixedDeltaTime;
+			Velocity.y += Gravity * Up.y * Time.fixedDeltaTime;
+		}
 
 		Velocity.x += acceleration.x * Right.x * Time.fixedDeltaTime;
 		Velocity.y += acceleration.x * Right.y * Time.fixedDeltaTime;
@@ -73,7 +78,8 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		// Lose velocity to friction
 		if (!IsDodging
 			&& (lastDirectionHeld == 0)
-			&& IsGrounded)
+			&& IsGrounded
+			&& Velocity.sqrMagnitude > .01f)
 		{
 			if (rightDot > 0)
 			{

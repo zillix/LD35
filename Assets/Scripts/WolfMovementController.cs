@@ -22,9 +22,11 @@ public class WolfMovementController : MonoBehaviour, ITickable
 	
 	public bool AtGoal { get; set; }
 
+	private float startZ;
+
 	void Awake()
 	{
-
+		startZ = transform.position.z;
 	}
 
 	void Start()
@@ -66,6 +68,7 @@ public class WolfMovementController : MonoBehaviour, ITickable
 		}
 
 		position = position.normalized * currentRadius;
+		position.z = startZ;
 
 		transform.position = position;
 
