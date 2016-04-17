@@ -187,6 +187,7 @@ public class IntroManager : MonoBehaviour {
 
 		if (wolfFled)
 		{
+			InvertInteriorCamera = false;
 			gameEnded = true;
 			text.enqueue("what kept you, dear?");
 			text.enqueue("would you like to know how the story ends?");

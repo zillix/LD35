@@ -255,8 +255,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 			return;
 		}
 
-		sounds.player.PlayOneShot(sounds.bopNose);
-
+		
 		// Knock back
 		Vector3 knockBack = Vector3.zero;
 
@@ -281,11 +280,15 @@ public class PlayerController : MonoBehaviour, ITickable {
 		Physics.SetVelocity(knockBack);
 		Physics.IsGrounded = false;
 
-		GameManager.instance.wolf.GetBopped();
-		GameManager.instance.introManager.OnWolfBopped();
+		if (GameManager.instance.wolf.enraged)
+		{
+			sounds.player.PlayOneShot(sounds.bopNose);
 
-		GameManager.instance.mainCamera.BeginCameraShake(WolfBopShakeDurationFrames, WolfBopShakeMagnitude);
+			GameManager.instance.wolf.GetBopped();
+			GameManager.instance.introManager.OnWolfBopped();
 
+			GameManager.instance.mainCamera.BeginCameraShake(WolfBopShakeDurationFrames, WolfBopShakeMagnitude);
+		}
 	}
 
 	private void ReceiveHit()
