@@ -66,9 +66,9 @@ public class GameManager : MonoBehaviour, ITickable {
 		flippedOnce = true;
 
 		wolf = Instantiate(WolfPrefab).GetComponent<WolfController>();
-		wolf.transform.position = (player.transform.position.normalized * -2);
+		wolf.transform.position = (player.transform.position.normalized * -1.5f);
+		wolf.transform.position += new Vector3(player.transform.position.y, -player.transform.position.x, 0).normalized * 1.5f;
 		Vector3 newpos = wolf.transform.position;
-		newpos = Vector3.zero;
 		newpos.z = 0;
 		wolf.transform.position = newpos;
 		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(((Vector2)(player.transform.position)).normalized * -1) + 180);

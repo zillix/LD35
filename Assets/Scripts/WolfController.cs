@@ -40,6 +40,8 @@ public class WolfController : MonoBehaviour, ITickable {
 	public GameEmitter EyeEmitter;
 	public GameEmitter NoseEmitter;
 
+	private Projector projector;
+
 
 
 	void Awake()
@@ -47,6 +49,7 @@ public class WolfController : MonoBehaviour, ITickable {
 		animator = GetComponentInChildren<Animator>();
 		animator.applyRootMotion = false;
 		movement = GetComponent<WolfMovementController>();
+		projector = GetComponent<Projector>();
 		HitsRemaining = TotalHits;
 
 	}
@@ -58,6 +61,7 @@ public class WolfController : MonoBehaviour, ITickable {
 		setState(WolfState.Assess);
 		noseRenderer = Nose.GetComponent<Renderer>();
 		initialNoseMaterial = noseRenderer.material;
+		projector.transform.SetParent(GameManager.instance.transform, true);
 	}
 	public void Update()
 	{
@@ -94,6 +98,8 @@ public class WolfController : MonoBehaviour, ITickable {
 		}
 
 		animator.SetBool("Enraged", enraged);
+
+		projector.transform.position = transform.position;
 
 	}
 

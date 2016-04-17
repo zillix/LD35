@@ -32,7 +32,7 @@ public class IntroManager : MonoBehaviour {
 
 	private int torchCountReported = 0;
 
-	private bool gameEnded = false;
+	public bool gameEnded = false;
 	public bool wolfFled = false;
 
 	public GameObject blackScreen;
@@ -121,7 +121,7 @@ public class IntroManager : MonoBehaviour {
 		{
 			//PlayerControls = false;
 			text.enqueue("hurry back!", 2f, null, false);
-			text.enqueue("[roll] down the hill!", -1, null, false);
+			text.enqueue("[press space to roll]", -1, null, false);
 		}
 		else if (torchesLit == 2)
 		{
