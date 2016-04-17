@@ -61,7 +61,8 @@ public class WolfController : MonoBehaviour, ITickable {
 	}
 	public void Update()
 	{
-		if (Input.GetButtonDown("DebugToggle"))
+		if (GameManager.DEBUG
+			&& Input.GetButtonDown("DebugToggle"))
 		{
 			enraged = !enraged;
 		}

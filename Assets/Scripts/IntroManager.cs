@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class IntroManager : MonoBehaviour {
 
@@ -36,6 +37,9 @@ public class IntroManager : MonoBehaviour {
 
 	public GameObject blackScreen;
 
+	public Text title;
+	public Text zillix;
+
 	public void Awake()
 	{
 		WolfHiding = true;
@@ -53,6 +57,18 @@ public class IntroManager : MonoBehaviour {
 	{
 		IntroStarted = true;
 
+		StartCoroutine(startGame());
+	}
+
+	private IEnumerator startGame()
+	{
+		yield return new WaitForSeconds(3f);
+
+		firstText();
+	}
+
+	public void firstText()
+	{
 		text.enqueue("tonight is a special night");
 		text.enqueue("let me tell you the tale of the wolf and the moon", 4f);
 
@@ -86,6 +102,14 @@ public class IntroManager : MonoBehaviour {
 
 				OnReturnHome();
 			}
+		}
+
+		if (IntroStarted)
+		{
+			Color color = title.color;
+			color.a -= Time.deltaTime;
+			title.color = color;
+			zillix.color = color;
 		}
 	}
 

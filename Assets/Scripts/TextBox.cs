@@ -73,7 +73,7 @@ public class TextBox : MonoBehaviour, ITextBox{
 	private void setAlpha(float value)
 	{
 		Color textColor = textField.color;
-		textColor.a = value;
+		textColor.a = value > 0 ? 1 : 0;
 		textField.color = textColor;
 
 		Color color = image.color;

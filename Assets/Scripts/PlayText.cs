@@ -10,7 +10,7 @@ public class PlayText {
 	public Callback callback;
 	public bool skippable;
 
-	public static float DEFAULT_DURATION = 2.5f;
+	public static float DEFAULT_DURATION = 3f;
 
 	public PlayText(string Text = "", float Duration = -1, Callback callbackFn = null, bool skippable = true)
 	{
