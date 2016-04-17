@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour, ITickable {
 
 	public bool BattleStarted { get { return introManager.BattleStarted; } }
 
-	
+	private bool flippedOnce = false;
 
 	public void Awake()
 	{
@@ -40,8 +40,7 @@ public class GameManager : MonoBehaviour, ITickable {
 		frameController = gameObject.AddComponent<FrameController>();
 		frameController.game = this;
 		fpsCounter = GetComponent<FPSCounter>();
-		wolf = Instantiate(WolfPrefab).GetComponent<WolfController>();
-		wolf.transform.position = GameObject.Find("WolfSpawn").transform.position;
+
 
 		introManager = GetComponentInChildren<IntroManager>();
     }
@@ -54,6 +53,25 @@ public class GameManager : MonoBehaviour, ITickable {
 
 		introManager.Init();
 	}
+
+	public void OnFlip()
+	{
+		if (flippedOnce)
+		{
+			return;
+		}
+
+		flippedOnce = true;
+
+		wolf = Instantiate(WolfPrefab).GetComponent<WolfController>();
+		wolf.transform.position = (player.transform.position.normalized * -2);
+		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(player.transform.position.normalized * -1) + 180);
+		wolf.transform.rotation = rotation;
+
+	}
+
+
+
 
 	public void TickFrame()
 	{

@@ -7,6 +7,8 @@ public class WolfController : MonoBehaviour, ITickable {
 	public Animator animator;
 	private WolfMovementController movement;
 
+	public bool IsHiding = false;
+
 	public int TotalHits = 3;
 	public int HitsRemaining
 	{
@@ -63,6 +65,8 @@ public class WolfController : MonoBehaviour, ITickable {
 		{
 			enraged = !enraged;
 		}
+
+		animator.SetBool("IsHiding", GameManager.instance.introManager.WolfHiding);
 	}
 
 
@@ -270,6 +274,11 @@ public class WolfController : MonoBehaviour, ITickable {
 				return 7;
 			case WolfState.Flee:
 				return 8;
+			case WolfState.Hiding:
+				return 9;
+
+			case WolfState.Assess:
+				return 10;
 
 		}
 
@@ -343,5 +352,6 @@ public enum WolfState
 	Flee,
 	None,
 	Hiding,
-	Appear
+	Appear,
+	Assess
 }

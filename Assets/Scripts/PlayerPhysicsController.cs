@@ -284,6 +284,8 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 		Up *= -1;
 		acceleration.x *= -1;
 
+		GameManager.instance.OnFlip();
+
 	}
 
 	void OnDrawGizmos()

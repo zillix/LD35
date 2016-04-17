@@ -12,7 +12,7 @@ public class IntroManager : MonoBehaviour {
 	public int torchesLit = 0;
 
 	public bool BattleStarted = false;
-	public bool RotateWorld = true;
+	public bool RotateWorld = false;
 
 	public bool AllTorchesLit = false;
 
@@ -24,10 +24,17 @@ public class IntroManager : MonoBehaviour {
 	public bool OutForLamp = false;
 	public bool PlayerControls = false;
 	public bool InvertInteriorCamera = false;
+	public bool WolfHiding { get; private set; }
 
 	private bool reportedThrowUp = false;
 
 	private int torchCountReported = 0;
+
+	public void Awake()
+	{
+		WolfHiding = true;
+
+	}
 
 	public void Init()
 	{
@@ -149,6 +156,12 @@ public class IntroManager : MonoBehaviour {
 			text.enqueue("the time has come to light the final lamp");
 		}
 
+	}
+
+	public void OnWolfTouch()
+	{
+		WolfHiding = false;
+		BattleStarted = true;
 	}
 
 

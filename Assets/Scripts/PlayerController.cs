@@ -304,6 +304,12 @@ public class PlayerController : MonoBehaviour, ITickable {
 			knockBack.y += KnockBackAmount.y * Physics.Up.y;
 		}
 
+		if (GameManager.instance.introManager.WolfHiding)
+		{
+			knockBack /= 2f;
+			GameManager.instance.introManager.OnWolfTouch();
+		}
+
 		Physics.SetVelocity(knockBack);
 		Physics.IsGrounded = false;
 		Physics.UncapSpeeds = true;

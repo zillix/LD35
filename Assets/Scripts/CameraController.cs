@@ -17,6 +17,7 @@ public class CameraController : MonoBehaviour, ITickable {
 	private float cameraAngle = 0;
 	public float InsideOrtho = 60f;
 	public float OutsideOrtho = 120f;
+	public float AssessOrtho = 160f;
 
 	private Camera mainCamera;
 
@@ -89,6 +90,11 @@ public class CameraController : MonoBehaviour, ITickable {
 		}
 
 		float targetOrthographicSize = player.IsInside ? InsideOrtho : OutsideOrtho;
+
+		if (GameManager.instance.wolf.State == WolfState.Assess)
+		{
+			targetOrthographicSize = AssessOrtho;
+		}
 		if (Mathf.Abs(mainCamera.orthographicSize - targetOrthographicSize) < Time.fixedDeltaTime * ZoomSpeed)
 		{
 			mainCamera.orthographicSize = targetOrthographicSize;
