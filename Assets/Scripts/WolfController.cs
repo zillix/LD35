@@ -30,17 +30,15 @@ public class WolfController : MonoBehaviour, ITickable {
 
 	private bool enraged = false;
 
-	public GameObject EyeBlurPrefab;
-	public GameObject eye;
-
 	public Material EnragedNoseMaterial;
 	private Material initialNoseMaterial;
 	public GameObject Nose;
 	private Renderer noseRenderer;
 
-	public float EyeBlurFrequency = .2f;
+	public GameEmitter EyeEmitter;
+	public GameEmitter NoseEmitter;
 
-	private GameObject dynamicObjects;
+
 
 	void Awake()
 	{
@@ -49,18 +47,6 @@ public class WolfController : MonoBehaviour, ITickable {
 		movement = GetComponent<WolfMovementController>();
 		HitsRemaining = TotalHits;
 
-		InvokeRepeating("EyeBlur", EyeBlurFrequency, EyeBlurFrequency);
-	}
-
-	void EyeBlur()
-	{
-		if (enraged)
-		{
-			GameObject blur = Instantiate(EyeBlurPrefab);
-			blur.transform.position = eye.transform.position;
-			blur.transform.rotation = eye.transform.rotation;
-			blur.transform.SetParent(dynamicObjects.transform, true);
-		}
 	}
 
 	void Start()
@@ -70,12 +56,21 @@ public class WolfController : MonoBehaviour, ITickable {
 		setState(WolfState.Idle);
 		noseRenderer = Nose.GetComponent<Renderer>();
 		initialNoseMaterial = noseRenderer.material;
-		dynamicObjects = GameObject.Find("DynamicObjects");
+	}
+	public void Update()
+	{
+		if (Input.GetButtonDown("DebugToggle"))
+		{
+			enraged = !enraged;
+		}
 	}
 
 
 	public void TickFrame()
 	{
+		EyeEmitter.EmitActive = enraged && !movement.AtGoal;
+		NoseEmitter.EmitActive = enraged && !movement.AtGoal;
+
 		movement.TickFrame();
 
 		Vector3 up = (transform.position - movement.WorldCenter.position).normalized;
@@ -102,6 +97,14 @@ public class WolfController : MonoBehaviour, ITickable {
 		if (stateData != null)
 		{
 			Debug.Log("Entering state " + newState + " from " + stateData.state);
+
+			if (stateData.state == WolfState.Howl)
+			{
+				if (HitsRemaining == 0)
+				{
+					newState = WolfState.Flee;
+				}
+			}
 		}
 
 		WolfStateData data = getData(newState);
@@ -280,11 +283,6 @@ public class WolfController : MonoBehaviour, ITickable {
 		setState(WolfState.RecoilHit);
 		enraged = true;
 		HitsRemaining--;
-
-		if (HitsRemaining == 0)
-		{
-			setState(WolfState.Flee);
-		}
 	}
 
 	public void GetBopped()
@@ -304,6 +302,7 @@ public class WolfStateData
 	public StateDurationType durationType;
 	public int minDuration;
 	public int maxDuration;
+	public int oscillationMagnitude;
 
 	public NextStateData[] nextStates;
 }

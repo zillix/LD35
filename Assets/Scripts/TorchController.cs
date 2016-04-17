@@ -13,9 +13,11 @@ public class TorchController : MonoBehaviour, ITickable {
 	public bool WasThrown = false;
 	public bool IsLit = true;
 
+	private GameEmitter emitter;
+
 	private PlayerController player;
 
-	private PlayerPhysicsController physics;
+	public PlayerPhysicsController Physics;
 
 	public GameObject LightAura;
 
@@ -24,25 +26,28 @@ public class TorchController : MonoBehaviour, ITickable {
 	void Start()
 	{
 		player = GameObject.FindObjectOfType<PlayerController>();
-		physics = GetComponent<PlayerPhysicsController>();
+		Physics = GetComponent<PlayerPhysicsController>();
 		IsHeld = true;
+		emitter = GetComponent<GameEmitter>();
 	}
 
 	public void TickFrame()
 	{
+		emitter.EmitActive = !IsLit;
+
 		if (IsHeld)
 		{
-			transform.position = player.transform.position + physics.Up * HeldDistOFfGround;
+			transform.position = player.transform.position + Physics.Up * HeldDistOFfGround;
 			transform.rotation = player.transform.rotation;
-			physics.SetUp(player.Physics.Up);
-			physics.Position = transform.position;
-			physics.SetVelocity(Vector3.zero);
-			physics.IsGrounded = false;
+			Physics.SetUp(player.Physics.Up);
+			Physics.Position = transform.position;
+			Physics.SetVelocity(Vector3.zero);
+			Physics.IsGrounded = false;
 		}
 		else
 		{
-			physics.TickFrame();
-			transform.position = physics.Position;
+			Physics.TickFrame();
+			transform.position = Physics.Position;
 
 			foreach (LanternController lantern in GameManager.instance.Lanterns)
 			{
@@ -56,13 +61,13 @@ public class TorchController : MonoBehaviour, ITickable {
 		}
 
 		if (!IsHeld
-			&& physics.IsGrounded
+			&& Physics.IsGrounded
 			&& (player.transform.position - transform.position).magnitude < GrabDist)
 		{
 			IsHeld = true;
 		}
 
-		if (physics.IsGrounded)
+		if (Physics.IsGrounded)
 		{
 			WasThrown = false;
 		}
@@ -84,10 +89,10 @@ public class TorchController : MonoBehaviour, ITickable {
 	public void Throw(Vector3 throwVel, bool voluntary)
 	{
 		throwVel *= ThrowVelMult;
-		throwVel.x += physics.Up.x * ThrowSpeed;
-		throwVel.y += physics.Up.y * ThrowSpeed;
+		throwVel.x += Physics.Up.x * ThrowSpeed;
+		throwVel.y += Physics.Up.y * ThrowSpeed;
 
-		physics.SetVelocity(throwVel);
+		Physics.SetVelocity(throwVel);
 
 		IsHeld = false;
 		WasThrown = voluntary;

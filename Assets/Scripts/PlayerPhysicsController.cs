@@ -211,6 +211,11 @@ public class PlayerPhysicsController : MonoBehaviour, ITickable {
 
 	public void Move(int direction)
 	{
+		if (IsDodging)
+		{
+			return;
+		}
+
 		if (direction == lastDirectionHeld)
 		{
 			return;

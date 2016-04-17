@@ -72,7 +72,9 @@ public class PlayerController : MonoBehaviour, ITickable {
 			throwTorch(true);
 		}
 
-		if (!Physics.IsDodging
+		if (IsTorchHeld
+			&& Torch.IsLit
+			&& !Physics.IsDodging
 			&& Physics.IsGrounded
 				&& input.GetButtonDown(Button.Flip))
 		{
@@ -136,12 +138,14 @@ public class PlayerController : MonoBehaviour, ITickable {
 		animator.SetBool("Dodging", Physics.IsDodging);
 		animator.SetFloat("Speed", Mathf.Abs(Physics.Velocity.magnitude));
 
-		Torch.TickFrame();
-
 		transform.position = Physics.Position;
 
 		Quaternion rotation = Quaternion.Euler(0, 0, MathUtil.VectorToAngle(RotationUp) - 90);
 		transform.rotation = rotation;
+
+
+
+		Torch.TickFrame();
 	}
 
 	public Vector3 RotationUp
@@ -162,7 +166,7 @@ public class PlayerController : MonoBehaviour, ITickable {
 		Torch.Throw(Physics.Velocity, voluntary);
 	}
 
-	public void OnCollisionEnter2D(Collider2D collider)
+	/*public void OnCollisionEnter2D(Collision2D collider)
 	{
 		if (collider.gameObject.layer == LayerMask.NameToLayer("Tongue"))
 		{
@@ -171,19 +175,20 @@ public class PlayerController : MonoBehaviour, ITickable {
 
 	}
 
-	public void OnCollisionStay2D(Collider2D collider)
+	public void OnCollisionStay2D(Collision2D collider)
 	{
 		if (collider.gameObject.layer == LayerMask.NameToLayer("Tongue"))
 		{
 			ReceiveHit();
 		}
-	}
+	}*/
 
 	public void OnTriggerEnter2D(Collider2D collider)
 	{
 		if (collider.gameObject.layer == LayerMask.NameToLayer("Teeth")
 			||
-			collider.gameObject.layer == LayerMask.NameToLayer("Wolf"))
+			collider.gameObject.layer == LayerMask.NameToLayer("Wolf") ||
+			collider.gameObject.layer == LayerMask.NameToLayer("TongueTouch"))
 		{
 			ReceiveHit();
 		}
@@ -199,7 +204,8 @@ public class PlayerController : MonoBehaviour, ITickable {
 	{
 		if (collider.gameObject.layer == LayerMask.NameToLayer("Teeth")
 			||
-			collider.gameObject.layer == LayerMask.NameToLayer("Wolf"))
+			collider.gameObject.layer == LayerMask.NameToLayer("Wolf") ||
+			collider.gameObject.layer == LayerMask.NameToLayer("TongueTouch"))
 		{
 			ReceiveHit();
 		}
@@ -220,7 +226,14 @@ public class PlayerController : MonoBehaviour, ITickable {
 		// Knock back
 		Vector3 knockBack = Vector3.zero;
 
-		float knockbackAmountX = facing == Direction.Right ? BopKnockBackAmount.x : -BopKnockBackAmount.x;
+		float knockbackAmountX = BopKnockBackAmount.x;
+
+		// Always hit away from wolf
+		Vector3 towardsWolf = GameManager.instance.wolf.transform.position - transform.position;
+		if (Vector3.Dot(Physics.Right, towardsWolf) > 0)
+		{
+			knockbackAmountX *= -1;
+		}
 
 		// right component
 		knockBack.x += knockbackAmountX * Physics.Right.x;
@@ -253,7 +266,14 @@ public class PlayerController : MonoBehaviour, ITickable {
 		// Knock back
 		Vector3 knockBack = Vector3.zero;
 
-		float knockbackAmountX = facing == Direction.Right ? KnockBackAmount.x : -KnockBackAmount.x;
+		float knockbackAmountX = KnockBackAmount.x;
+
+		// Always hit away from wolf
+		Vector3 towardsWolf = GameManager.instance.wolf.transform.position - transform.position;
+		if (Vector3.Dot(Physics.Right, towardsWolf) < -.1f)
+		{
+			knockbackAmountX *= -1;
+		}
 
 		// right component
 		knockBack.x += knockbackAmountX * Physics.Right.x;

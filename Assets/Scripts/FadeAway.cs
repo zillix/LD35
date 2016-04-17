@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnragedEyeBlur : MonoBehaviour {
+public class FadeAway : MonoBehaviour {
 
 	public float FadeRate = 1f;
 

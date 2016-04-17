@@ -42,8 +42,8 @@ public class WolfMovementController : MonoBehaviour, ITickable
 
 	public void TickFrame()
 	{
-		
 
+		TargetAngleAnchor = new Vector3(TargetAngleAnchor.x, TargetAngleAnchor.y, 0);
 		targetPosition = (TargetAngleAnchor - WorldCenter.position).normalized * TargetRadius;
 
 
